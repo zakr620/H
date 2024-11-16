@@ -2108,7 +2108,7 @@ function Journe:CreateWindow(Settings)
 						local function updateMainSize(Slider)
 
 							local valueWidth = Slider.Value.AbsoluteSize.X
-							Slider.Main.Size = UDim2.new(1, -(valueWidth + 45), 0, 2)
+							Slider.Main.Size = UDim2.new(1, -(valueWidth + Slider.Slider.TextBounds.X + 20), 0, 2)
 							Slider.Main.Position = UDim2.new(1, -(valueWidth + 10), 0.5, 0)
 						end
 
