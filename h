@@ -318,6 +318,13 @@ function Utilities.Transition(frames, positionOffsetY, transparencyGoal, duratio
 	return animationComplete.Event
 end
 
+function Utilities.IsInBounds(gui, point)
+	local position = gui.AbsolutePosition
+	local size = gui.AbsoluteSize
+	return point.X >= position.X and point.X <= position.X + size.X and
+		point.Y >= position.Y and point.Y <= position.Y + size.Y
+end
+
 Journe = {
 	Main = Utilities.NewObject("ScreenGui", {
 		Parent = Services.RunService:IsStudio() and Variables.LocalPlayer:WaitForChild("PlayerGui") or Services.CoreGui,
@@ -326,9 +333,50 @@ Journe = {
 		Name = "Journe",
 		ResetOnSpawn = false,
 		DisplayOrder = 2147483647,
-		ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+	}),
+
+	Notifications = Utilities.NewObject("Frame", {
+		Parent = nil,
+		Name = "Notifications",
+		BorderSizePixel = 0,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		AnchorPoint = Vector2.new(1, 1),
+		Size = UDim2.new(0, 200, 70, 0),
+		Position = UDim2.new(1, 10, 1, 0),
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		BackgroundTransparency = 1
+	}),
+
+	NotificationsPadding = Utilities.NewObject("UIPadding", {
+		Parent = nil,
+		Name = "NotificationsPadding",
+		PaddingLeft = UDim.new(0, 5),
+		PaddingBottom = UDim.new(0, 5)
+	}),
+
+	NotificationsLayout = Utilities.NewObject("UIListLayout", {
+		Parent = nil,
+		Name = "UIPageLayout",
+		FillDirection = Enum.FillDirection.Vertical,
+		VerticalAlignment = Enum.VerticalAlignment.Bottom,
+		HorizontalAlignment = Enum.HorizontalAlignment.Right,
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Padding = UDim.new(0, 5)
 	})
 }
+
+do
+	if _G.JOURNEINSTANCE then
+		_G.JOURNEINSTANCE:Destroy()
+	end
+
+	_G.JOURNEINSTANCE = Journe.Main
+
+	Journe.Notifications.Parent = Journe.Main
+	Journe.NotificationsPadding.Parent = Journe.Notifications
+	Journe.NotificationsLayout.Parent = Journe.Notifications
+end
 
 function Journe:CreateWindow(Settings)
 	Settings = Utilities.Settings({
@@ -343,6 +391,7 @@ function Journe:CreateWindow(Settings)
 
 	local Interface = {
 		Activetab = nil,
+		CurrentPicker = nil,
 		InputHandler = {
 			Settings = {
 				Hover = false
@@ -1086,6 +1135,26 @@ function Journe:CreateWindow(Settings)
 										table.insert(connections, event:Connect(function()
 											completed = completed + 1
 											if completed >= 2 then
+												if Interface.CurrentPicker ~= nil then
+													if Interface.Interface.Visible == true then
+														Utilities.Tween(Interface.CurrentPicker, {
+															Goal = {Position = UDim2.new(Interface.CurrentPicker.Position.X.Scale, Interface.CurrentPicker.Position.X.Offset - 135, Interface.CurrentPicker.Position.Y.Scale, Interface.CurrentPicker.Position.Y.Offset)},
+															Duration = 0.6,
+															EasingStyle = Enum.EasingStyle.Exponential,	
+															EasingDirection = Enum.EasingDirection.In,
+															Callback = function()
+																Interface.CurrentPicker.Visible = false
+															end
+														})
+													else
+														Utilities.Tween(Interface.CurrentPicker, {
+															Goal = {Position = UDim2.new(Interface.CurrentPicker.Position.X.Scale, Interface.CurrentPicker.Position.X.Offset + 135, Interface.CurrentPicker.Position.Y.Scale, Interface.CurrentPicker.Position.Y.Offset)},
+															EasingStyle = Enum.EasingStyle.Exponential,
+															EasingDirection = Enum.EasingDirection.In,
+															Duration = 0.6
+														})
+													end
+												end
 
 												Interface.Interface.Visible = not Interface.Interface.Visible
 
@@ -1094,6 +1163,12 @@ function Journe:CreateWindow(Settings)
 												end
 
 												task.wait(0.05)
+
+												if Interface.CurrentPicker ~= nil then
+													if Interface.Interface.Visible == true then
+														Interface.CurrentPicker.Visible = true
+													end
+												end
 
 												Utilities.Transition(Interface.framesTop, -0.5, 0, 0.6, 0.3, 0.1, not Variables.ShouldReverse)
 												Utilities.Transition(Interface.framesBottom, 1, 0, 0.6, 0.3, 0.1, not Variables.ShouldReverse)
@@ -1257,6 +1332,22 @@ function Journe:CreateWindow(Settings)
 								table.insert(connections, event:Connect(function()
 									completed = completed + 1
 									if completed >= 2 then
+										if Interface.CurrentPicker ~= nil then
+											if Interface.Interface.Visible == true then
+												Utilities.Tween(Interface.CurrentPicker, {
+													Goal = {Position = UDim2.new(Interface.CurrentPicker.Position.X.Scale, Interface.CurrentPicker.Position.X.Offset - 135, Interface.CurrentPicker.Position.Y.Scale, Interface.CurrentPicker.Position.Y.Offset)},
+													Duration = 0.6,
+													Callback = function()
+														Interface.CurrentPicker.Visible = false
+													end
+												})
+											else
+												Utilities.Tween(Interface.CurrentPicker, {
+													Goal = {Position = UDim2.new(Interface.CurrentPicker.Position.X.Scale, Interface.CurrentPicker.Position.X.Offset + 135, Interface.CurrentPicker.Position.Y.Scale, Interface.CurrentPicker.Position.Y.Offset)},
+													Duration = 0.6
+												})
+											end
+										end
 
 										Interface.Interface.Visible = not Interface.Interface.Visible
 
@@ -1265,6 +1356,12 @@ function Journe:CreateWindow(Settings)
 										end
 
 										task.wait(0.05)
+
+										if Interface.CurrentPicker ~= nil then
+											if Interface.Interface.Visible == true then
+												Interface.CurrentPicker.Visible = true
+											end
+										end
 
 										Utilities.Transition(Interface.framesTop, -0.5, 0, 0.6, 0.3, 0.1, not Variables.ShouldReverse)
 										Utilities.Transition(Interface.framesBottom, 1, 0, 0.6, 0.3, 0.1, not Variables.ShouldReverse)
@@ -1287,7 +1384,7 @@ function Journe:CreateWindow(Settings)
 				Interface.Discord.MouseLeave:Connect(function() onMouseLeave(Interface.Discord) end)
 				Interface.Discord.InputBegan:Connect(function(input)
 					onInputBegan(Interface.Visibility, function()
-						SetClipboard(Settings.DiscordLink)
+						Setclipboard(Settings.DiscordLink)
 					end, input)
 				end)
 				Interface.Discord.InputEnded:Connect(function(input)
@@ -1298,7 +1395,7 @@ function Journe:CreateWindow(Settings)
 				Interface.Youtube.MouseLeave:Connect(function() onMouseLeave(Interface.Youtube) end)
 				Interface.Youtube.InputBegan:Connect(function(input)
 					onInputBegan(Interface.Visibility, function()
-						SetClipboard(Settings.YouTubeLink)
+						Setclipboard(Settings.YouTubeLink)
 					end, input)
 				end)
 				Interface.Youtube.InputEnded:Connect(function(input)
@@ -1389,6 +1486,7 @@ function Journe:CreateWindow(Settings)
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 				ClipsDescendants = false,
 				Size = UDim2.new(1, 0, 1, 0),
+				CanvasSize = UDim2.new(0, 0, 9999, 0),
 				ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0),
 				BorderColor3 = Color3.fromRGB(0, 0, 0),
 				ScrollBarThickness = 0,
@@ -1613,6 +1711,12 @@ function Journe:CreateWindow(Settings)
 							elseif v.Name == "KeyBind" then
 								Height += 40
 								Elements += 1
+							elseif v.Name == "Colorpicker" then
+								Height += 40
+								Elements += 1
+							elseif v.Name == "Dropdown" then
+								Height += 40
+								Elements += 1
 							end
 						end
 
@@ -1701,7 +1805,6 @@ function Journe:CreateWindow(Settings)
 						BackgroundTransparency = 1,
 						Position = UDim2.new(1, 0, 0.5, 0)
 					})
-
 					do
 						function Button:Settext(Text)
 							Button.Button.Text = Text
@@ -2006,8 +2109,7 @@ function Journe:CreateWindow(Settings)
 
 				local Slider = {
 					ValueNum = Settings.Default,
-					Dragging = false,
-					Hover = false
+					Dragging = false
 				}
 
 				do
@@ -2156,7 +2258,7 @@ function Journe:CreateWindow(Settings)
 								else
 									Utilities.Tween(Slider.Value, {
 										Goal = {Size = newSize},
-										Duration = 0.12,
+										Duration = 0.08,
 										Callback = function()
 											updateMainSize(Slider)
 
@@ -2168,7 +2270,7 @@ function Journe:CreateWindow(Settings)
 
 											Utilities.Tween(Slider.Circle, {
 												Goal = {Position = UDim2.new(0, pixelOffset, 0.5, 0)},
-												Duration = 0.12
+												Duration = 0.08
 											})
 										end
 									})
@@ -2181,6 +2283,21 @@ function Journe:CreateWindow(Settings)
 
 							Settings.Callback(value)
 							updateFrames()
+						end
+
+						local function updateSliderFromMousePosition(Slider, inputPosition)
+							Variables.DisableDragging = true
+							local mainSize = Slider.Main.AbsoluteSize.X
+							local circleSize = Slider.Circle.AbsoluteSize.X
+							local maxOffset = mainSize - circleSize
+
+							local relativeX = inputPosition.X - Slider.Main.AbsolutePosition.X - (circleSize/2)
+							relativeX = math.clamp(relativeX, 0, maxOffset)
+
+							local percent = relativeX / maxOffset
+							local value = Settings.Min + (Settings.Max - Settings.Min) * percent
+
+							Slider:SetValue(value)
 						end
 
 						Slider.ValueLabel.Focused:Connect(function()
@@ -2213,70 +2330,60 @@ function Journe:CreateWindow(Settings)
 						end)
 
 						Slider.Slider.MouseEnter:Connect(function()
-							Slider.Hover = true
-							if not Slider.Dragging then
-								Utilities.Tween(Slider.ValueStroke, {
-									Goal = {Color = Color3.fromRGB(45, 45, 45)},
-									Duration = 0.12
-								})
-							end
+							Utilities.Tween(Slider.Slider, {
+								Goal = {TextColor3 = Color3.fromRGB(226, 226, 226)},
+								Duration = 0.12
+							})
+							Utilities.Tween(Slider.ValueStroke, {
+								Goal = {Color = Color3.fromRGB(45, 45, 45)},
+								Duration = 0.12
+							})
 						end)
 
 						Slider.Slider.MouseLeave:Connect(function()
-							Slider.Hover = false
-							if not Slider.Dragging then
-								Utilities.Tween(Slider.ValueStroke, {
-									Goal = {Color = Color3.fromRGB(35, 35, 35)},
-									Duration = 0.12
-								})
-							end
+							Utilities.Tween(Slider.Slider, {
+								Goal = {TextColor3 = Color3.fromRGB(126, 126, 126)},
+								Duration = 0.12
+							})
+							Utilities.Tween(Slider.ValueStroke, {
+								Goal = {Color = Color3.fromRGB(35, 35, 35)},
+								Duration = 0.12
+							})
 						end)
-
-						local function updateSliderFromMousePosition(Slider, inputPosition)
-							Variables.DisableDragging = true
-							local mainSize = Slider.Main.AbsoluteSize.X
-							local circleSize = Slider.Circle.AbsoluteSize.X
-							local maxOffset = mainSize - circleSize
-
-							local relativeX = inputPosition.X - Slider.Main.AbsolutePosition.X - (circleSize/2)
-							relativeX = math.clamp(relativeX, 0, maxOffset)
-
-							local percent = relativeX / maxOffset
-							local value = Settings.Min + (Settings.Max - Settings.Min) * percent
-
-							Slider:SetValue(value)
-						end
 
 						Slider.Main.InputBegan:Connect(function(input)
 							if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 								Variables.DisableDragging = true
 								Slider.Dragging = true
 								updateSliderFromMousePosition(Slider, input.Position)
-
-								Utilities.Tween(Slider.ValueStroke, {
-									Goal = {Color = Color3.fromRGB(45, 45, 45)},
-									Duration = 0.12
-								})
 							end
 						end)
 
-						Services.UserInputService.InputChanged:Connect(function(input)
+						Slider.Slider.InputChanged:Connect(function(input)
 							if Slider.Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 								Variables.DisableDragging = true
 								updateSliderFromMousePosition(Slider, input.Position)
 							end
 						end)
 
-						Services.UserInputService.InputEnded:Connect(function(input)
+						Slider.Slider.InputEnded:Connect(function(input)
 							if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 								Slider.Dragging = false
 
 								if Slider.Hover then
+									Utilities.Tween(Slider.Slider, {
+										Goal = {TextColor3 = Color3.fromRGB(226, 226, 226)},
+										Duration = 0.12
+									})
 									Utilities.Tween(Slider.ValueStroke, {
 										Goal = {Color = Color3.fromRGB(45, 45, 45)},
 										Duration = 0.12
 									})
 								else
+									Utilities.Tween(Slider.Slider, {
+										Goal = {TextColor3 = Color3.fromRGB(126, 126, 126)},
+										Duration = 0.12
+									})
 									Utilities.Tween(Slider.ValueStroke, {
 										Goal = {Color = Color3.fromRGB(35, 35, 35)},
 										Duration = 0.12
@@ -2305,8 +2412,6 @@ function Journe:CreateWindow(Settings)
 				}, Settings or {})
 
 				local Toggle = {
-					Hover = false,
-					MouseDown = false,
 					State = Settings.Default
 				}
 
@@ -2417,7 +2522,6 @@ function Journe:CreateWindow(Settings)
 						end
 
 						Toggle.Toggle.MouseEnter:Connect(function()
-							Toggle.Hover = true
 							Utilities.Tween(Toggle.Toggle, {
 								Goal = {TextColor3 = Color3.fromRGB(226, 226, 226)},
 								Duration = 0.12
@@ -2425,22 +2529,20 @@ function Journe:CreateWindow(Settings)
 						end)
 
 						Toggle.Toggle.MouseLeave:Connect(function()
-							Toggle.Hover = false
 							Utilities.Tween(Toggle.Toggle, {
 								Goal = {TextColor3 = Color3.fromRGB(126, 126, 126)},
 								Duration = 0.12
 							})
 						end)
 
-						Services.UserInputService.InputBegan:Connect(function(input)
-							if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and Toggle.Hover then
+						Toggle.Toggle.InputBegan:Connect(function(input)
+							if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 								Toggle:SetState()
 							end
 						end)
 
-						Services.UserInputService.InputEnded:Connect(function(input)
+						Toggle.Toggle.InputEnded:Connect(function(input)
 							if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-								Toggle.MouseDown = false
 								if Toggle.Hover then
 									Utilities.Tween(Toggle.Toggle, {
 										Goal = {TextColor3 = Color3.fromRGB(226, 226, 226)},
@@ -2467,7 +2569,6 @@ function Journe:CreateWindow(Settings)
 				}, Settings or {})
 
 				local Keybind = {
-					Hover = false,
 					Binding = false,
 					Key = Settings.Default,
 					Connection = nil
@@ -2557,20 +2658,34 @@ function Journe:CreateWindow(Settings)
 					})
 
 					do
-						Keybind.Bind.MouseEnter:Connect(function()
-							Keybind.Hover = true
+						Keybind.KeyBind.MouseEnter:Connect(function()
+							Utilities.Tween(Keybind.KeyBind, {
+								Goal = {TextColor3 = Color3.fromRGB(226, 226, 226)},
+								Duration = 0.12
+							})
+							Utilities.Tween(Keybind.BindStroke, {
+								Goal = {Color = Color3.fromRGB(45, 45, 45)},
+								Duration = 0.12
+							})
 						end)
 
-						Keybind.Bind.MouseLeave:Connect(function()
-							Keybind.Hover = false
+						Keybind.KeyBind.MouseLeave:Connect(function()
+							Utilities.Tween(Keybind.KeyBind, {
+								Goal = {TextColor3 = Color3.fromRGB(126, 126, 126)},
+								Duration = 0.12
+							})
+							Utilities.Tween(Keybind.BindStroke, {
+								Goal = {Color = Color3.fromRGB(35, 35, 35)},
+								Duration = 0.12
+							})
 						end)
 
-						Services.UserInputService.InputBegan:Connect(function(Input)
+						Keybind.KeyBind.InputBegan:Connect(function(Input)
 							if Keybind.Binding then
 								return
 							end
 
-							if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and Keybind.Hover then
+							if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
 								Keybind.Binding = true
 
 								coroutine.wrap(function()
@@ -2602,6 +2717,30 @@ function Journe:CreateWindow(Settings)
 										Keybind.Connection:Disconnect()
 									end
 								end)
+
+								Keybind.KeyBind.InputEnded:Connect(function(input)
+									if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+										if Keybind.Hover then
+											Utilities.Tween(Keybind.KeyBind, {
+												Goal = {TextColor3 = Color3.fromRGB(226, 226, 226)},
+												Duration = 0.12
+											})
+											Utilities.Tween(Keybind.BindStroke, {
+												Goal = {Color = Color3.fromRGB(45, 45, 45)},
+												Duration = 0.12
+											})
+										else
+											Utilities.Tween(Keybind.KeyBind, {
+												Goal = {TextColor3 = Color3.fromRGB(126, 126, 126)},
+												Duration = 0.12
+											})
+											Utilities.Tween(Keybind.BindStroke, {
+												Goal = {Color = Color3.fromRGB(35, 35, 35)},
+												Duration = 0.12
+											})
+										end
+									end
+								end)
 							end
 						end)
 					end
@@ -2612,17 +2751,1045 @@ function Journe:CreateWindow(Settings)
 			function Group:AddColorpicker(Settings)
 				Settings = Utilities.Settings({
 					Title = "Demo",
-					Default = "V",
-					Callback = function(v) end
+					Default = {
+						Color = Color3.fromRGB(255, 255, 255),
+						Alpha = 100
+					},
+					Callback = function(Color, Alpha) end
 				}, Settings or {})
-			end
 
+				local Colorpicker = {
+					ColorVal = Settings.Default.Color,
+					AlphaVal = Settings.Default.Alpha,
+					Connections = {},
+					InteractingMain = false,
+					InteractingHue = false,
+					InteractingAlpha = false
+				}
+
+				do
+					Colorpicker.Colorpicker = Utilities.NewObject("TextLabel", {
+						Parent = Group.Items,
+						Name = "Colorpicker",
+						BorderSizePixel = 0,
+						TextXAlignment = Enum.TextXAlignment.Left,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						TextSize = 12,
+						FontFace = Font.new("rbxasset://fonts/families/Roboto.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+						TextColor3 = Color3.fromRGB(127, 127, 127),
+						BackgroundTransparency = 1,
+						Size = UDim2.new(1, 0, 0, 30),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text = Settings.Title,
+						Position = UDim2.new(-0.02797, 0, 0.87391, 0)
+					})
+
+					Colorpicker.ColorpickerPadding = Utilities.NewObject("UIPadding", {
+						Parent = Colorpicker.Colorpicker,
+						Name = "ColorpickerPadding",
+						PaddingRight = UDim.new(0, 10),
+						PaddingLeft = UDim.new(0, 10)
+					})
+
+					Colorpicker.Preview = Utilities.NewObject("Frame", {
+						Parent = Colorpicker.Colorpicker,
+						Name = "Preview",
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 0, 0),
+						AnchorPoint = Vector2.new(1, 0.5),
+						Size = UDim2.new(0, 15, 0, 15),
+						Position = UDim2.new(1, 0, 0.5, 0),
+						BorderColor3 = Color3.fromRGB(0, 0, 0)
+					})
+
+					Colorpicker.PreviewCorner = Utilities.NewObject("UICorner", {
+						Parent = Colorpicker.Preview,
+						Name = "PreviewCorner",
+						CornerRadius = UDim.new(0, 4)
+					})
+
+					Colorpicker.PreviewStroke = Utilities.NewObject("UIStroke", {
+						Parent = Colorpicker.Preview,
+						Name = "PreviewStroke",
+						ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+						Color = Color3.fromRGB(36, 36, 36)
+					})
+
+					Colorpicker.Picker = Utilities.NewObject("CanvasGroup", {
+						Parent = Interface.Core,
+						Name = "Picker",
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(24, 24, 24),
+						AnchorPoint = Vector2.new(1, 0),
+						Size = UDim2.new(0, 125, 0, 160),
+						Position = UDim2.new(1, 130, 0, 0),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Visible = false
+					})
+
+					Colorpicker.Main = Utilities.NewObject("Frame", {
+						Parent = Colorpicker.Picker,
+						Name = "Main",
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 0, 0),
+						Size = UDim2.new(0, 115, 0, 83),
+						Position = UDim2.new(0, 5, 0, 5),
+						BorderColor3 = Color3.fromRGB(0, 0, 0)
+					})
+
+					Colorpicker.Overlay = Utilities.NewObject("ImageLabel", {
+						Parent = Colorpicker.Main,
+						Name = "Overlay",
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						Image = "rbxassetid://137209735553764",
+						Size = UDim2.new(1, 0, 1, 0),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						BackgroundTransparency = 1
+					})
+
+					Colorpicker.BorderCorner = Utilities.NewObject("UICorner", {
+						Parent = Colorpicker.Overlay,
+						Name = "BorderCorner",
+						CornerRadius = UDim.new(0, 3)
+					})
+
+					Colorpicker.Cursor = Utilities.NewObject("ImageLabel", {
+						Parent = Colorpicker.Main,
+						Name = "Cursor",
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						ImageColor3 = Color3.fromRGB(255, 0, 0),
+						AnchorPoint = Vector2.new(0.5, 0.5),
+						Image = "rbxassetid://138369252414915",
+						Size = UDim2.new(0, 12, 0, 12),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						BackgroundTransparency = 1,
+						Position = UDim2.new(0, 150, 0, -5)
+					})
+
+					Colorpicker.BorderCorner = Utilities.NewObject("UICorner", {
+						Parent = Colorpicker.Main,
+						Name = "BorderCorner",
+						CornerRadius = UDim.new(0, 3)
+					})
+
+					Colorpicker.BorderCorner = Utilities.NewObject("UICorner", {
+						Parent = Colorpicker.Picker,
+						Name = "BorderCorner",
+						CornerRadius = UDim.new(0, 6)
+					})
+
+					Colorpicker.Hue = Utilities.NewObject("Frame", {
+						Parent = Colorpicker.Picker,
+						Name = "Hue",
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						Size = UDim2.new(1, -10, 0, 8),
+						Position = UDim2.new(0, 5, 0, 99),
+						BorderColor3 = Color3.fromRGB(0, 0, 0)
+					})
+
+					Colorpicker.HueCorner = Utilities.NewObject("UICorner", {
+						Parent = Colorpicker.Hue,
+						Name = "HueCorner",
+						CornerRadius = UDim.new(0, 6)
+					})
+
+					Colorpicker.HueGradient = Utilities.NewObject("UIGradient", {
+						Parent = Colorpicker.Hue,
+						Name = "HueGradient",
+						Color = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(255, 0, 0)),ColorSequenceKeypoint.new(0.125, Color3.fromRGB(255, 139, 0)),ColorSequenceKeypoint.new(0.250, Color3.fromRGB(255, 231, 0)),ColorSequenceKeypoint.new(0.375, Color3.fromRGB(21, 255, 0)),ColorSequenceKeypoint.new(0.500, Color3.fromRGB(0, 164, 255)),ColorSequenceKeypoint.new(0.625, Color3.fromRGB(6, 0, 255)),ColorSequenceKeypoint.new(0.750, Color3.fromRGB(174, 0, 255)),ColorSequenceKeypoint.new(0.875, Color3.fromRGB(255, 0, 200)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(255, 0, 0))}
+					})
+
+					Colorpicker.AlphaPicker = Utilities.NewObject("Frame", {
+						Parent = Colorpicker.Picker,
+						Name = "Alpha",
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						Size = UDim2.new(1, -10, 0, 8),
+						Position = UDim2.new(0, 5, 0, 115),
+						BorderColor3 = Color3.fromRGB(0, 0, 0)
+					})
+
+					Colorpicker.AlphaBorder = Utilities.NewObject("UICorner", {
+						Parent = Colorpicker.AlphaPicker,
+						Name = "AlphaBorder",
+						CornerRadius = UDim.new(0, 6)
+					})
+
+					Colorpicker.AlphaGradient = Utilities.NewObject("UIGradient", {
+						Parent = Colorpicker.AlphaPicker,
+						Name = "AlphaGradient",
+						Transparency = NumberSequence.new{NumberSequenceKeypoint.new(0.000, 1),NumberSequenceKeypoint.new(1.000, 0)}
+					})
+
+					Colorpicker.Hex = Utilities.NewObject("Frame", {
+						Parent = Colorpicker.Picker,
+						Name = "Hex",
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						Size = UDim2.new(1, -10, 0, 28),
+						Position = UDim2.new(0, 5, 0, 131),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						BackgroundTransparency = 1
+					})
+
+					Colorpicker.CodeArea = Utilities.NewObject("Frame", {
+						Parent = Colorpicker.Hex,
+						Name = "CodeArea",
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(32, 32, 32),
+						ClipsDescendants = true,
+						Size = UDim2.new(0, 64, 0, 20),
+						BorderColor3 = Color3.fromRGB(0, 0, 0)
+					})
+
+					Colorpicker.CodeAreaCorner = Utilities.NewObject("UICorner", {
+						Parent = Colorpicker.CodeArea,
+						Name = "CodeAreaCorner",
+						CornerRadius = UDim.new(0, 4)
+					})
+
+					Colorpicker.CodeAreaStroke = Utilities.NewObject("UIStroke", {
+						Parent = Colorpicker.CodeArea,
+						Name = "CodeAreaStroke",
+						ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+						Color = Color3.fromRGB(36, 36, 36)
+					})
+
+					Colorpicker.HexCode = Utilities.NewObject("TextLabel", {
+						Parent = Colorpicker.CodeArea,
+						Name = "HexCode",
+						TextWrapped = true,
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						TextSize = 14,
+						FontFace = Font.new("rbxassetid://11702779409", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+						TextColor3 = Color3.fromRGB(136, 136, 136),
+						BackgroundTransparency = 1,
+						RichText = true,
+						AnchorPoint = Vector2.new(0.5, 0.5),
+						Size = UDim2.new(0, 58, 0, 15),
+						ClipsDescendants = true,
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text = [[<font color="#9CA3AF">#</font><font color="#374151">FFFFFF</font>]],
+						Position = UDim2.new(0.5, 0, 0.5, 0)
+					})
+
+					Colorpicker.HexCodePadding = Utilities.NewObject("UIPadding", {
+						Parent = Colorpicker.HexCode,
+						Name = "HexCodePadding",
+						PaddingLeft = UDim.new(0, 5)
+					})
+
+					Colorpicker.AplhaArea = Utilities.NewObject("Frame", {
+						Parent = Colorpicker.Hex,
+						Name = "CodeArea",
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(32, 32, 32),
+						ClipsDescendants = true,
+						Size = UDim2.new(0, 39, 0, 20),
+						Position = UDim2.new(0, 74, 0, 0),
+						BorderColor3 = Color3.fromRGB(0, 0, 0)
+					})
+
+					Colorpicker.AlphaAreaCorner = Utilities.NewObject("UICorner", {
+						Parent = Colorpicker.AplhaArea,
+						Name = "CodeAreaCorner",
+						CornerRadius = UDim.new(0, 4)
+					})
+
+					Colorpicker.AlphaAreaStroke = Utilities.NewObject("UIStroke", {
+						Parent = Colorpicker.AplhaArea,
+						Name = "CodeAreaStroke",
+						ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+						Color = Color3.fromRGB(36, 36, 36)
+					})
+
+					Colorpicker.AlphaValue = Utilities.NewObject("TextLabel", {
+						Parent = Colorpicker.AplhaArea,
+						Name = "AlphaValue",
+						TextWrapped = true,
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						TextSize = 16,
+						FontFace = Font.new("rbxassetid://11702779409", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+						TextColor3 = Color3.fromRGB(136, 136, 136),
+						BackgroundTransparency = 1,
+						RichText = true,
+						AnchorPoint = Vector2.new(0.5, 0.5),
+						Size = UDim2.new(1, 0, 0, 15),
+						ClipsDescendants = true,
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text = "100%",
+						Position = UDim2.new(0.5, 0, 0.5, 0)
+					})
+
+					Colorpicker.AlphaValuePadding = Utilities.NewObject("UIPadding", {
+						Parent = Colorpicker.AplhaValue,
+						Name = "AlphaValuePadding",
+						PaddingLeft = UDim.new(0, 5)
+					})
+
+					do
+						Colorpicker.Colorpicker.MouseEnter:Connect(function()
+							Utilities.Tween(Colorpicker.Colorpicker, {
+								Goal = {TextColor3 = Color3.fromRGB(226, 226, 226)},
+								Duration = 0.12
+							})
+						end)
+
+						Colorpicker.Colorpicker.MouseLeave:Connect(function()
+							Utilities.Tween(Colorpicker.Colorpicker, {
+								Goal = {TextColor3 = Color3.fromRGB(126, 126, 126)},
+								Duration = 0.12
+							})
+						end)
+
+						Colorpicker.Colorpicker.InputBegan:Connect(function(Input)
+							if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+								if Interface.CurrentPicker ~= nil then
+									Colorpicker.Picker.Visible = not Colorpicker.Picker.Visible
+									Interface.CurrentPicker.Visible = not Interface.CurrentPicker.Visible
+									Interface.CurrentPicker = Colorpicker.Picker
+								else
+									Colorpicker.Picker.Visible = not Colorpicker.Picker.Visible
+									Interface.CurrentPicker = Colorpicker.Picker
+								end
+							end
+						end)
+
+						Colorpicker.Colorpicker.InputEnded:Connect(function(input)
+							if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+								if Colorpicker.Hover then
+									Utilities.Tween(Colorpicker.Colorpicker, {
+										Goal = {TextColor3 = Color3.fromRGB(226, 226, 226)},
+										Duration = 0.12
+									})
+								else
+									Utilities.Tween(Colorpicker.Colorpicker, {
+										Goal = {TextColor3 = Color3.fromRGB(126, 126, 126)},
+										Duration = 0.12
+									})
+								end
+							end
+						end)
+
+						do
+							local function HSVToRGB(h, s, v)
+								if s == 0 then
+									return v, v, v
+								end
+
+								h = h / 360
+								local i = math.floor(h * 6)
+								local f = h * 6 - i
+								local p = v * (1 - s)
+								local q = v * (1 - f * s)
+								local t = v * (1 - (1 - f) * s)
+
+								i = i % 6
+								if i == 0 then return v, t, p
+								elseif i == 1 then return q, v, p
+								elseif i == 2 then return p, v, t
+								elseif i == 3 then return p, q, v
+								elseif i == 4 then return t, p, v
+								elseif i == 5 then return v, p, q
+								end
+							end
+
+							local function RGBToHSV(r, g, b)
+								local max = math.max(r, g, b)
+								local min = math.min(r, g, b)
+								local h, s, v
+
+								v = max
+								local delta = max - min
+
+								if max ~= 0 then
+									s = delta / max
+								else
+									s = 0
+									h = -1
+									return h, s, v
+								end
+
+								if r == max then
+									h = (g - b) / delta
+								elseif g == max then
+									h = 2 + (b - r) / delta
+								else
+									h = 4 + (r - g) / delta
+								end
+
+								h = h * 60
+								if h < 0 then
+									h = h + 360
+								end
+
+								return h, s, v
+							end
+
+							local function RGBToHex(r, g, b)
+								return string.format("#%02X%02X%02X", r * 255, g * 255, b * 255)
+							end
+
+							function Colorpicker:SetColor(Color, Alpha)
+								Colorpicker.Color = Color or Colorpicker.ColorVal
+								Colorpicker.Alpha = (100 - Alpha) / 100 or (100 - Colorpicker.AlphaVal) / 100
+
+								Colorpicker.Preview.BackgroundColor3 = Colorpicker.Color
+
+								local hex = RGBToHex(Colorpicker.Color.R, Colorpicker.Color.G, Colorpicker.Color.B)
+								Colorpicker.HexCode.Text = string.format([[<font color="#9CA3AF">#</font><font color="#374151">%s</font>]], hex:sub(2))
+								Colorpicker.AlphaValue.Text = string.format("%d%%", Alpha)
+
+								Colorpicker.AlphaGradient.Color = ColorSequence.new({
+									ColorSequenceKeypoint.new(0, Colorpicker.Color),
+									ColorSequenceKeypoint.new(1, Colorpicker.Color)
+								})
+								Colorpicker.AlphaGradient.Transparency = NumberSequence.new{
+									NumberSequenceKeypoint.new(0.000, 1),
+									NumberSequenceKeypoint.new(1.000, 0)
+								}
+
+								local h, s, v = RGBToHSV(Color.R, Color.G, Color.B)
+								local x = s * Colorpicker.Main.AbsoluteSize.X
+								local y = (1 - v) * Colorpicker.Main.AbsoluteSize.Y
+
+								Utilities.Tween(Colorpicker.Cursor, {
+									Goal = {Position = UDim2.new(0, x, 0, y)},
+									Duration = 0.08
+								})
+
+								Utilities.Tween(Colorpicker.Preview, {
+									Goal = {BackgroundColor3 = Color},
+									Duration = 0.08
+								})
+
+								Utilities.Tween(Colorpicker.Cursor, {
+									Goal = {ImageColor3 = Color},
+									Duration = 0.08
+								})
+
+								local RGB = Color3.fromRGB(
+									math.floor(Color.R * 255),
+									math.floor(Color.G * 255),
+									math.floor(Color.B * 255)
+								)
+								Settings.Callback(RGB, Colorpicker.Alpha)
+							end
+
+							function Colorpicker:GetColor()
+								return Colorpicker.Color, Colorpicker.Alpha
+							end
+
+							Colorpicker.Main.InputBegan:Connect(function(input)
+								if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+									Colorpicker.InteractingMain = true
+									local function update()
+										if not Colorpicker.InteractingMain then return end
+
+										local relative = Vector2.new(
+											Variables.Mouse.X - Colorpicker.Main.AbsolutePosition.X,
+											Variables.Mouse.Y - Colorpicker.Main.AbsolutePosition.Y
+										)
+										local x = math.clamp(relative.X, 0, Colorpicker.Main.AbsoluteSize.X)
+										local y = math.clamp(relative.Y, 0, Colorpicker.Main.AbsoluteSize.Y)
+
+										local s = x / Colorpicker.Main.AbsoluteSize.X
+										local v = 1 - (y / Colorpicker.Main.AbsoluteSize.Y)
+										local h = select(1, RGBToHSV(Colorpicker.Main.BackgroundColor3.R, Colorpicker.Main.BackgroundColor3.G, Colorpicker.Main.BackgroundColor3.B))
+
+										local r, g, b = HSVToRGB(h, s, v)
+										Colorpicker:SetColor(Color3.new(r, g, b), Colorpicker.AlphaVal)
+									end
+
+									table.insert(Colorpicker.Connections, Services.RunService.RenderStepped:Connect(update))
+									update()
+								end
+							end)
+
+							Colorpicker.Hue.InputBegan:Connect(function(input)
+								if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+									Colorpicker.InteractingHue = true
+									local function update()
+										if not Colorpicker.InteractingHue then return end
+
+										local mouse = Services.UserInputService:GetMouseLocation()
+										local relative = mouse - Colorpicker.Hue.AbsolutePosition
+										local h = math.clamp(relative.X / Colorpicker.Hue.AbsoluteSize.X, 0, 1) * 360
+
+										local hr, hg, hb = HSVToRGB(h, 1, 1)
+										Utilities.Tween(Colorpicker.Main, {
+											Goal = {BackgroundColor3 = Color3.new(hr, hg, hb)},
+											Duration = 0.08
+										})
+
+										local cursorPos = Colorpicker.Cursor.Position
+										local s = cursorPos.X.Offset / Colorpicker.Main.AbsoluteSize.X
+										local v = 1 - (cursorPos.Y.Offset / Colorpicker.Main.AbsoluteSize.Y)
+
+										local r, g, b = HSVToRGB(h, s, v)
+										local newColor = Color3.new(r, g, b)
+
+										Colorpicker:SetColor(newColor, Colorpicker.AlphaVal)
+									end
+
+									table.insert(Colorpicker.Connections, Services.RunService.RenderStepped:Connect(update))
+									update()
+								end
+							end)
+
+							Colorpicker.AlphaPicker.InputBegan:Connect(function(input)
+								if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+									Colorpicker.InteractingAlpha = true
+									local function update()
+										if not Colorpicker.InteractingAlpha then return end
+
+										local mouse = Services.UserInputService:GetMouseLocation()
+										local relative = mouse - Colorpicker.AlphaPicker.AbsolutePosition
+										local alpha = math.floor(math.clamp(relative.X / Colorpicker.AlphaPicker.AbsoluteSize.X, 0, 1) * 100)
+										Colorpicker.AlphaVal = alpha
+										Colorpicker:SetColor(Colorpicker.Color, alpha)
+									end
+
+									table.insert(Colorpicker.Connections, Services.RunService.RenderStepped:Connect(update))
+									update()
+								end
+							end)
+
+							Services.UserInputService.InputEnded:Connect(function(input)
+								if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+									Colorpicker.InteractingMain = false
+									Colorpicker.InteractingHue = false
+									Colorpicker.InteractingAlpha = false
+
+									for _, connection in ipairs(Colorpicker.Connections) do
+										connection:Disconnect()
+									end
+									table.clear(Colorpicker.Connections)
+								end
+							end)
+
+							Colorpicker:SetColor(Settings.Default.Color, Settings.Default.Alpha)
+						end
+					end
+				end
+
+				return Colorpicker
+			end
 			function Group:AddDropdown(Settings)
 				Settings = Utilities.Settings({
 					Title = "Demo",
-					Default = "V",
-					Callback = function(v) end
+					MultipleSelection = false
 				}, Settings or {})
+
+				local Dropdown = {
+					StoredItems = {},
+					Open = false,
+					SelectedItems = {},
+					CurrentItem = nil,
+					MultipleSelection = Settings.MultipleSelection,
+					Listener = nil
+				}
+
+				do
+					Dropdown.Dropdown = Utilities.NewObject("Frame", {
+						Parent = Group.Items,
+						Name = "Dropdown",
+						ZIndex = 2,
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(24, 24, 24),
+						AnchorPoint = Vector2.new(0.5, 0.5),
+						Size = UDim2.new(1, -20, 0, 30),
+						BorderColor3 = Color3.fromRGB(0, 0, 0)
+					})
+
+					Dropdown.Title = Utilities.NewObject("TextLabel", {
+						Parent = Dropdown.Dropdown,
+						Name = "Title",
+						BorderSizePixel = 0,
+						ZIndex = 2,
+						TextXAlignment = Enum.TextXAlignment.Left,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						TextSize = 12,
+						FontFace = Font.new("rbxasset://fonts/families/Roboto.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+						TextColor3 = Color3.fromRGB(127, 127, 127),
+						BackgroundTransparency = 1,
+						Size = UDim2.new(0, 150, 0, 30),
+						ClipsDescendants = true,
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text = Settings.Title .. " • None"
+					})
+
+					Dropdown.Icon = Utilities.NewObject("ImageLabel", {
+						Parent = Dropdown.Dropdown,
+						Name = "Icon",
+						BorderSizePixel = 0,
+						ZIndex = 2,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						ImageColor3 = Color3.fromRGB(127, 127, 127),
+						AnchorPoint = Vector2.new(1, 0.5),
+						Image = "rbxassetid://101920802489602",
+						Size = UDim2.new(0, 20, 0, 20),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						BackgroundTransparency = 1,
+						Position = UDim2.new(1, 0, 0.5, 0)
+					})
+
+					Dropdown.DropdownCorner = Utilities.NewObject("UICorner", {
+						Parent = Dropdown.Dropdown,
+						Name = "DropdownCorner",
+						CornerRadius = UDim.new(0, 6)
+					})
+
+					Dropdown.DropdownStroke = Utilities.NewObject("UIStroke", {
+						Parent = Dropdown.Dropdown,
+						Name = "DropdownStroke",
+						ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+						Color = Color3.fromRGB(32, 32, 32)
+					})
+
+					Dropdown.DropdownPadding = Utilities.NewObject("UIPadding", {
+						Parent = Dropdown.Dropdown,
+						Name = "DropdownPadding",
+						PaddingRight = UDim.new(0, 10),
+						PaddingLeft = UDim.new(0, 10)
+					})
+
+					Dropdown.Backdrop = Utilities.NewObject("Frame", {
+						Parent = Dropdown.Dropdown,
+						Name = "Backdrop",
+						Visible = false,
+						ZIndex = 1,
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(20, 20, 20),
+						ClipsDescendants = true,
+						Size = UDim2.new(1, 20, 0, 0),
+						Position = UDim2.new(0, -10, 0, 25),
+						BorderColor3 = Color3.fromRGB(0, 0, 0)
+					})
+
+					Dropdown.BackdropStroke = Utilities.NewObject("UIStroke", {
+						Parent = Dropdown.Backdrop,
+						Name = "BackdropStroke",
+						ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+						Color = Color3.fromRGB(28, 28, 28)
+					})
+
+					Dropdown.BackdropPadding = Utilities.NewObject("UIPadding", {
+						Parent = Dropdown.Backdrop,
+						Name = "BackdropPadding",
+						PaddingTop = UDim.new(0, 20),
+						PaddingRight = UDim.new(0, 10),
+						PaddingLeft = UDim.new(0, 10)
+					})
+
+					Dropdown.BackdropCorner = Utilities.NewObject("UICorner", {
+						Parent = Dropdown.Backdrop,
+						Name = "BackdropCorner",
+						CornerRadius = UDim.new(0, 6)
+					})
+
+					Dropdown.Items = Utilities.NewObject("Frame", {
+						Parent = Dropdown.Backdrop,
+						Name = "Items",
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						Size = UDim2.new(1, 0, 1, -10),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						BackgroundTransparency = 1
+					})
+
+					Dropdown.ItemsLayout = Utilities.NewObject("UIListLayout", {
+						Parent = Dropdown.Items,
+						Name = "ItemsLayout",
+						Padding = UDim.new(0, 10),
+						SortOrder = Enum.SortOrder.LayoutOrder
+					})
+
+					do
+						function Dropdown:AddOption(Id, Title, Callback, Selected)
+							Callback = Callback or function(ID) end
+							local originalId = Id
+
+							while Dropdown.StoredItems[Id] do
+								if tonumber(Id) then
+									Id = tostring(tonumber(Id) + 1)
+								else
+									Id = Id .. "1"
+								end
+							end
+
+							Dropdown.StoredItems[Id] = {
+								Selected = Selected or false
+							}
+
+							if Selected then
+								table.insert(Dropdown.SelectedItems, {Id = Id, Title = Title})
+							end
+
+							do
+								Dropdown.StoredItems[Id].Item = Utilities.NewObject("Frame", {
+									Parent = Dropdown.Items,
+									Name = "Option",
+									BorderSizePixel = 0,
+									BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+									Size = UDim2.new(1, 0, 0, 20),
+									BorderColor3 = Color3.fromRGB(0, 0, 0),
+									BackgroundTransparency = 1,
+									ZIndex = 5
+								})
+
+								Dropdown.StoredItems[Id].Title = Utilities.NewObject("TextLabel", {
+									Parent = Dropdown.StoredItems[Id].Item,
+									Name = "Title",
+									BorderSizePixel = 0,
+									TextXAlignment = Enum.TextXAlignment.Left,
+									BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+									TextSize = 12,
+									FontFace = Font.new("rbxasset://fonts/families/Roboto.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+									TextColor3 = Color3.fromRGB(127, 127, 127),
+									BackgroundTransparency = 1,
+									Size = UDim2.new(0, 150, 0, 20),
+									ClipsDescendants = true,
+									BorderColor3 = Color3.fromRGB(0, 0, 0),
+									Text = Title or "Option",
+									ZIndex = 5
+								})
+
+								Dropdown.StoredItems[Id].OptionPadding = Utilities.NewObject("UIPadding", {
+									Parent = Dropdown.StoredItems[Id].Item,
+									Name = "OptionPadding",
+									PaddingRight = UDim.new(0, 10),
+									PaddingLeft = UDim.new(0, 5)
+								})
+
+								do
+									Dropdown.StoredItems[Id].Item.MouseEnter:Connect(function()
+										if not Dropdown.StoredItems[Id].Selected then
+											Utilities.Tween(Dropdown.StoredItems[Id].Title, {
+												Goal = {TextColor3 = Color3.fromRGB(226, 226, 226)},
+												Duration = 0.12
+											})
+										end
+									end)
+
+									Dropdown.StoredItems[Id].Item.MouseLeave:Connect(function()
+										if not Dropdown.StoredItems[Id].Selected then
+											Utilities.Tween(Dropdown.StoredItems[Id].Title, {
+												Goal = {TextColor3 = Color3.fromRGB(126, 126, 126)},
+												Duration = 0.12
+											})
+										end
+									end)
+
+									Dropdown.StoredItems[Id].Item.InputBegan:Connect(function(input)
+										if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+											if Dropdown.MultipleSelection then
+
+												Dropdown.StoredItems[Id].Selected = not Dropdown.StoredItems[Id].Selected
+
+												if Dropdown.StoredItems[Id].Selected then
+													Utilities.Tween(Dropdown.StoredItems[Id].Title, {
+														Goal = {TextColor3 = Color3.fromRGB(226, 226, 226)},
+														Duration = 0.12
+													})
+													table.insert(Dropdown.SelectedItems, {Id = Id, Title = Title})
+												else
+													Utilities.Tween(Dropdown.StoredItems[Id].Title, {
+														Goal = {TextColor3 = Color3.fromRGB(126, 126, 126)},
+														Duration = 0.12
+													})
+													for i, item in ipairs(Dropdown.SelectedItems) do
+														if item.Id == Id then
+															table.remove(Dropdown.SelectedItems, i)
+															break
+														end
+													end
+												end
+
+												if #Dropdown.SelectedItems == 0 then
+													Dropdown.Title.Text = Settings.Title .. " • None"
+												else
+													Dropdown.Title.Text = Settings.Title .. " • " .. #Dropdown.SelectedItems .. " Selected"
+												end
+											else
+
+												if Dropdown.CurrentItem then
+													Utilities.Tween(Dropdown.CurrentItem.Title, {
+														Goal = {TextColor3 = Color3.fromRGB(126, 126, 126)},
+														Duration = 0.12
+													})
+													Dropdown.CurrentItem.Selected = false
+												end
+
+												Utilities.Tween(Dropdown.StoredItems[Id].Title, {
+													Goal = {TextColor3 = Color3.fromRGB(226, 226, 226)},
+													Duration = 0.12
+												})
+
+												Dropdown.StoredItems[Id].Selected = true
+												Dropdown.CurrentItem = Dropdown.StoredItems[Id]
+												Dropdown.Title.Text = Settings.Title .. " • " .. Title
+											end
+
+											Callback(Id, Title)
+										end
+									end)
+
+									if not Dropdown.MultipleSelection and Dropdown.CurrentItem == nil then
+										Utilities.Tween(Dropdown.StoredItems[Id].Title, {
+											Goal = {TextColor3 = Color3.fromRGB(226, 226, 226)},
+											Duration = 0.12
+										})
+
+										Dropdown.StoredItems[Id].Selected = true
+										Dropdown.CurrentItem = Dropdown.StoredItems[Id]
+										Dropdown.Title.Text = Settings.Title .. " • " .. Title
+									end
+								end
+							end
+
+							Dropdown.StoredItems[Id].Callback = Callback
+						end
+
+						function Dropdown:Remove(Id)
+							if Dropdown.StoredItems[Id] then
+
+								if Dropdown.CurrentItem == Dropdown.StoredItems[Id] then
+									Dropdown.CurrentItem = nil
+									Dropdown.Title.Text = Settings.Title .. " • None"
+								end
+
+								if Dropdown.MultipleSelection then
+									for i, item in ipairs(Dropdown.SelectedItems) do
+										if item.Id == Id then
+											table.remove(Dropdown.SelectedItems, i)
+											break
+										end
+									end
+
+									if #Dropdown.SelectedItems == 0 then
+										Dropdown.Title.Text = Settings.Title .. " • None"
+									else
+										Dropdown.Title.Text = Settings.Title .. " • " .. #Dropdown.SelectedItems .. " Selected"
+									end
+								end
+
+								Dropdown.StoredItems[Id].Item:Destroy()
+								Dropdown.StoredItems[Id] = nil
+							end
+						end
+
+						function Dropdown:GetSelected()
+							if Dropdown.MultipleSelection then
+
+								return Dropdown.SelectedItems
+							else
+
+								if Dropdown.CurrentItem then
+									for id, item in pairs(Dropdown.StoredItems) do
+										if item == Dropdown.CurrentItem then
+											return {
+												Id = id,
+												Title = item.Title.Text
+											}
+										end
+									end
+								end
+							end
+							return {}
+						end
+
+						function Dropdown:Clear()
+
+							if Dropdown.MultipleSelection then
+								for _, item in pairs(Dropdown.StoredItems) do
+									Utilities.Tween(item.Title, {
+										Goal = {TextColor3 = Color3.fromRGB(126, 126, 126)},
+										Duration = 0.12
+									})
+									item.Selected = false
+								end
+								Dropdown.SelectedItems = {}
+							else
+								if Dropdown.CurrentItem then
+									Utilities.Tween(Dropdown.CurrentItem.Title, {
+										Goal = {TextColor3 = Color3.fromRGB(126, 126, 126)},
+										Duration = 0.12
+									})
+									Dropdown.CurrentItem.Selected = false
+									Dropdown.CurrentItem = nil
+								end
+							end
+
+							Dropdown.Title.Text = Settings.Title .. " • None"
+
+							if Dropdown.Open then
+								Dropdown.Open = false
+								Dropdown.Backdrop.Visible = true
+								Utilities.Tween(Dropdown.Backdrop, {
+									Goal = {Size = UDim2.new(1, 20, 0, 0)},
+									Duration = 0.12,
+									Callback = coroutine.wrap(function()
+										task.wait(0.16)
+										Dropdown.Backdrop.Visible = false
+									end)()
+								})
+							end
+						end
+
+						function Dropdown:Refresh(NewOptions)
+
+							for id in pairs(Dropdown.StoredItems) do
+								Dropdown.StoredItems[id].Item:Destroy()
+								Dropdown.StoredItems[id] = nil
+							end
+
+							Dropdown.SelectedItems = {}
+							Dropdown.CurrentItem = nil
+							Dropdown.Title.Text = Settings.Title .. " • None"
+
+							if Dropdown.Open then
+								Dropdown.Open = false
+								Dropdown.Backdrop.Visible = true
+								Utilities.Tween(Dropdown.Backdrop, {
+									Goal = {Size = UDim2.new(1, 20, 0, 0)},
+									Duration = 0.12,
+									Callback = coroutine.wrap(function()
+										task.wait(0.16)
+										Dropdown.Backdrop.Visible = false
+									end)()
+								})
+							end
+
+							if type(NewOptions) == "table" then
+								for _, option in ipairs(NewOptions) do
+									if type(option) == "table" then
+										Dropdown:AddOption(
+											option.Id or option.id or option.Title or option.title,
+											option.Title or option.title,
+											option.Callback or option.callback,
+											option.Selected or option.selected
+										)
+									end
+								end
+							end
+						end
+
+						Dropdown.Dropdown.MouseEnter:Connect(function()
+							Utilities.Tween(Dropdown.Title, {
+								Goal = {TextColor3 = Color3.fromRGB(226, 226, 226)},
+								Duration = 0.12
+							})
+							Utilities.Tween(Dropdown.Icon, {
+								Goal = {ImageColor3 = Color3.fromRGB(226, 226, 226)},
+								Duration = 0.12
+							})
+						end)
+
+						Dropdown.Dropdown.MouseLeave:Connect(function()
+							Utilities.Tween(Dropdown.Title, {
+								Goal = {TextColor3 = Color3.fromRGB(126, 126, 126)},
+								Duration = 0.12
+							})
+							Utilities.Tween(Dropdown.Icon, {
+								Goal = {ImageColor3 = Color3.fromRGB(126, 126, 126)},
+								Duration = 0.12
+							})
+						end)
+
+						Dropdown.Dropdown.InputBegan:Connect(function(input)
+							if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+								Dropdown.Open = not Dropdown.Open
+								if not Dropdown.Open then
+
+									if Dropdown.Listener then
+										Dropdown.Listener:Disconnect()
+										Dropdown.Listener = nil
+									end
+
+									Dropdown.Backdrop.Visible = true
+									Dropdown.Dropdown.ZIndex = 2
+									Dropdown.Title.ZIndex = 2
+									Dropdown.Icon.ZIndex = 2
+									Dropdown.Backdrop.ZIndex = 1
+									Utilities.Tween(Dropdown.Backdrop, {
+										Goal = {Size = UDim2.new(1, 20, 0, 0)},
+										Duration = 0.12,
+										Callback = coroutine.wrap(function()
+											task.wait(0.16)
+											Dropdown.Backdrop.Visible = false
+										end)()
+									})
+								else
+									local count = 0
+									for _ in pairs(Dropdown.StoredItems) do
+										count += 1
+									end
+
+									Dropdown.Dropdown.ZIndex = 6
+									Dropdown.Title.ZIndex = 6
+									Dropdown.Icon.ZIndex = 6
+									Dropdown.Backdrop.ZIndex = 5
+									Dropdown.Backdrop.Visible = true
+									Utilities.Tween(Dropdown.Backdrop, {
+										Goal = {Size = UDim2.new(1, 20, 0, 30 + (count * 30) - 10)},
+										Duration = 0.12
+									})
+
+									Dropdown.Listener = Services.UserInputService.InputBegan:Connect(function(input)
+										if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+											local absolutePosition = Dropdown.Dropdown.AbsolutePosition
+											local absoluteSize = Dropdown.Dropdown.AbsoluteSize
+											local mousePosition = Vector2.new(input.Position.X, input.Position.Y)
+
+											local isInDropdownBounds = mousePosition.X >= absolutePosition.X - 10 and
+												mousePosition.X <= absolutePosition.X + absoluteSize.X + 10 and
+												mousePosition.Y >= absolutePosition.Y and
+												mousePosition.Y <= absolutePosition.Y + absoluteSize.Y + Dropdown.Backdrop.AbsoluteSize.Y
+
+											if not isInDropdownBounds then
+												Dropdown.Open = false
+
+												Dropdown.Listener:Disconnect()
+												Dropdown.Listener = nil
+
+												Dropdown.Backdrop.Visible = true
+												Dropdown.Dropdown.ZIndex = 2
+												Dropdown.Title.ZIndex = 2
+												Dropdown.Icon.ZIndex = 2
+												Dropdown.Backdrop.ZIndex = 1
+												Utilities.Tween(Dropdown.Backdrop, {
+													Goal = {Size = UDim2.new(1, 20, 0, 0)},
+													Duration = 0.12,
+													Callback = coroutine.wrap(function()
+														task.wait(0.16)
+														Dropdown.Backdrop.Visible = false
+													end)()
+												})
+											end
+										end
+									end)
+								end
+							end
+						end)
+
+						function Dropdown:Destroy()
+							if Dropdown.Listener then
+								Dropdown.Listener:Disconnect()
+								Dropdown.Listener = nil
+							end
+
+							self.Dropdown:Destroy()
+						end
+					end
+				end
+
+				return Dropdown
 			end
 
 			Services.RunService.RenderStepped:Connect(function()
@@ -2634,6 +3801,137 @@ function Journe:CreateWindow(Settings)
 		return Tab	
 	end
 	return Interface
+end
+
+function Journe:Notify(Settings)
+	Settings = Utilities.Settings({
+		Title = "Journe Demo",
+		Description = "Baseplate - Test",
+		Duration = 6,
+		Type = "Notification"
+	}, Settings or {})
+
+	local Notification = {}
+
+	do
+		Notification.Notification = Utilities.NewObject("Frame", {
+			Parent = Journe.Notifications,
+			Name = "Notification",
+			BorderSizePixel = 0,
+			BackgroundColor3 = Color3.fromRGB(16, 16, 16),
+			AnchorPoint = Vector2.new(1, 0.5),
+			Size = UDim2.new(1, 0, 0, 60),
+			Position = UDim2.new(1.09487, 0, 0.99998, 0),
+			BorderColor3 = Color3.fromRGB(0, 0, 0)
+		})
+
+		Notification.NotificationCorner = Utilities.NewObject("UICorner", {
+			Parent = Notification.Notification,
+			Name = "NotificationCorner",
+			CornerRadius = UDim.new(0, 6)
+		})
+
+		Notification.Backdrop = Utilities.NewObject("Frame", {
+			Parent = Notification.Notification,
+			Name = "Backdrop",
+			BorderSizePixel = 0,
+			BackgroundColor3 = Color3.fromRGB(21, 21, 21),
+			AnchorPoint = Vector2.new(0, 0.5),
+			Size = UDim2.new(0, 40, 0, 40),
+			Position = UDim2.new(0, 10, 0.5, 0),
+			BorderColor3 = Color3.fromRGB(0, 0, 0)
+		})
+
+		Notification.BackdropCorner = Utilities.NewObject("UICorner", {
+			Parent = Notification.Backdrop,
+			Name = "BackdropCorner",
+			CornerRadius = UDim.new(1, 0)
+		})
+
+		Notification.BackdropStroke = Utilities.NewObject("UIStroke", {
+			Parent = Notification.Backdrop,
+			Name = "BackdropStroke",
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+			Color = Color3.fromRGB(25, 25, 25)
+		})
+
+		Notification.Icon = Utilities.NewObject("ImageLabel", {
+			Parent = Notification.Backdrop,
+			Name = "Icon",
+			BorderSizePixel = 0,
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			ImageColor3 = Color3.fromRGB(127, 127, 127),
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Image = Settings.Type == "Notification" and "rbxassetid://118500495053779" or Settings.Type == "Warning" and "rbxassetid://123461891178438",
+			Size = UDim2.new(0, 20, 0, 20),
+			BorderColor3 = Color3.fromRGB(0, 0, 0),
+			BackgroundTransparency = 1,
+			Position = UDim2.new(0.5, 0, 0.5, 0)
+		})
+
+		Notification.Text = Utilities.NewObject("TextLabel", {
+			Parent = Notification.Notification,
+			Name = "Text",
+			BorderSizePixel = 0,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextYAlignment = Enum.TextYAlignment.Top,
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			TextSize = 15,
+			FontFace = Font.new("rbxassetid://11702779409", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
+			TextColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 1,
+			AnchorPoint = Vector2.new(0, 0.5),
+			Size = UDim2.new(1, -70, 1, 0),
+			BorderColor3 = Color3.fromRGB(0, 0, 0),
+			Text = Settings.Title,
+			Position = UDim2.new(0, 60, 0.5, 0)
+		})
+
+		Notification.TextPadding = Utilities.NewObject("UIPadding", {
+			Parent = Notification.Text,
+			Name = "TextPadding",
+			PaddingTop = UDim.new(0, 15),
+			PaddingLeft = UDim.new(0, 10)
+		})
+
+		Notification.Description = Utilities.NewObject("TextLabel", {
+			Parent = Notification.Text,
+			Name = "Description",
+			BorderSizePixel = 0,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextYAlignment = Enum.TextYAlignment.Top,
+			TextWrapped = true,
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			TextSize = 10,
+			FontFace = Font.new("rbxassetid://11702779409", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+			TextColor3 = Color3.fromRGB(45, 45, 45),
+			BackgroundTransparency = 1,
+			Size = UDim2.new(1, 0, 0, 40),
+			BorderColor3 = Color3.fromRGB(0, 0, 0),
+			Text = Settings.Description
+		})
+
+		Notification.DescriptionPadding = Utilities.NewObject("UIPadding", {
+			Parent = Notification.Description,
+			Name = "DescriptionPadding",
+			PaddingTop = UDim.new(0, 15),
+			PaddingLeft = UDim.new(0, 1)
+		})
+
+		task.spawn(function()
+			task.wait(Settings.Duration)
+			Utilities.Tween(Notification.Notification, {
+				Goal = {Size = UDim2.new(0, 0, 0, 60)},
+				Duration = 1,
+				Callback = coroutine.wrap(function()
+					task.wait(1)
+					Notification.Notification:Destroy()
+				end)
+			})
+		end)
+	end	
+
+	return 	Notification
 end
 
 return Journe
