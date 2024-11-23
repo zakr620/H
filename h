@@ -10,7 +10,7 @@ local DisableDragging = false
 local ShouldReverse = true
 local Transitioning = false
 
-_G.ThemeJourne = _G.ThemeJourne or "Coffee"
+_G.ThemeJourne = _G.ThemeJourne or "Sunset"
 
 Utilities = {}
 
