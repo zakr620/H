@@ -10,8 +10,6 @@ local DisableDragging = false
 local ShouldReverse = true
 local Transitioning = false
 
-_G.ThemeJourne = _G.ThemeJourne or "Coffee"
-
 Utilities = {}
 
 function Utilities.NewObject(className, properties)
@@ -152,537 +150,11 @@ Journe = {
 			}
 		},
 
-		Barbie = {
-			Background = Color3.fromRGB(255, 245, 250), 
-			Seperators = Color3.fromRGB(255, 182, 193), 
-			ImageNText = {
-				Light = Color3.fromRGB(0, 0, 0), 
-				Dark = Color3.fromRGB(51, 51, 51), 
-				ReallyDark = Color3.fromRGB(25, 25, 25) 
-			},
-			Group = {
-				Title = Color3.fromRGB(51, 51, 51), 
-				Background = Color3.fromRGB(255, 235, 241), 
-				Items = {
-					ImageNText = {
-						Normal = Color3.fromRGB(75, 75, 75), 
-						Hover = Color3.fromRGB(255, 51, 153) 
-					},
-					Stroke = {
-						Normal = Color3.fromRGB(255, 192, 203), 
-						Hover = Color3.fromRGB(255, 105, 180) 
-					},
-					ExtraArea = Color3.fromRGB(255, 240, 245), 
-					Toggle = {
-						ToggleBackground = {
-							Off = Color3.fromRGB(200, 200, 200), 
-							On = Color3.fromRGB(255, 51, 153) 
-						},
-						Switch = {
-							Off = Color3.fromRGB(255, 255, 255), 
-							On = Color3.fromRGB(255, 255, 255) 
-						}
-					},
-					Slider = {
-						SliderBackground = Color3.fromRGB(255, 51, 153) 
-					},
-					Dropdown = {
-						DropdownBackground = Color3.fromRGB(255, 250, 252), 
-						Backdrop = Color3.fromRGB(255, 245, 250) 
-					}
-				}
-			},
-			Tabs = {
-				Background = {
-					Inactive = Color3.fromRGB(255, 240, 245), 
-					HoverNActive = Color3.fromRGB(255, 220, 230) 
-				},
-				Stroke = {
-					Inactive = Color3.fromRGB(255, 192, 203), 
-					HoverNActive = Color3.fromRGB(255, 105, 180) 
-				},
-				Text = Color3.fromRGB(51, 51, 51) 
-			}
-		},
+		Custom = {
 
-		Sunset = {
-			Background = Color3.fromRGB(35, 15, 45), 
-			Seperators = Color3.fromRGB(45, 20, 55), 
-			ImageNText = {
-				Light = Color3.fromRGB(255, 255, 255), 
-				Dark = Color3.fromRGB(255, 170, 100), 
-				ReallyDark = Color3.fromRGB(150, 50, 60) 
-			},
-			Group = {
-				Title = Color3.fromRGB(255, 190, 140), 
-				Background = Color3.fromRGB(40, 17, 50), 
-				Items = {
-					ImageNText = {
-						Normal = Color3.fromRGB(255, 150, 90), 
-						Hover = Color3.fromRGB(255, 210, 170) 
-					},
-					Stroke = {
-						Normal = Color3.fromRGB(70, 25, 85), 
-						Hover = Color3.fromRGB(90, 35, 105) 
-					},
-					ExtraArea = Color3.fromRGB(50, 20, 60), 
-					Toggle = {
-						ToggleBackground = {
-							Off = Color3.fromRGB(70, 25, 85), 
-							On = Color3.fromRGB(255, 140, 80) 
-						},
-						Switch = {
-							Off = Color3.fromRGB(120, 40, 140), 
-							On = Color3.fromRGB(255, 180, 120) 
-						}
-					},
-					Slider = {
-						SliderBackground = Color3.fromRGB(255, 160, 100) 
-					},
-					Dropdown = {
-						DropdownBackground = Color3.fromRGB(45, 18, 55), 
-						Backdrop = Color3.fromRGB(35, 15, 45) 
-					}
-				}
-			},
-			Tabs = {
-				Background = {
-					Inactive = Color3.fromRGB(40, 17, 50), 
-					HoverNActive = Color3.fromRGB(50, 20, 60) 
-				},
-				Stroke = {
-					Inactive = Color3.fromRGB(60, 22, 70), 
-					HoverNActive = Color3.fromRGB(80, 30, 90) 
-				},
-				Text = Color3.fromRGB(255, 170, 110) 
-			}
-		},
-
-		Ocean = {
-			Background = Color3.fromRGB(15, 25, 35), 
-			Seperators = Color3.fromRGB(20, 35, 45), 
-			ImageNText = {
-				Light = Color3.fromRGB(255, 255, 255), 
-				Dark = Color3.fromRGB(100, 200, 255), 
-				ReallyDark = Color3.fromRGB(40, 90, 140) 
-			},
-			Group = {
-				Title = Color3.fromRGB(130, 210, 255), 
-				Background = Color3.fromRGB(18, 30, 40), 
-				Items = {
-					ImageNText = {
-						Normal = Color3.fromRGB(90, 180, 255), 
-						Hover = Color3.fromRGB(150, 220, 255) 
-					},
-					Stroke = {
-						Normal = Color3.fromRGB(25, 45, 65), 
-						Hover = Color3.fromRGB(35, 65, 85) 
-					},
-					ExtraArea = Color3.fromRGB(20, 35, 50), 
-					Toggle = {
-						ToggleBackground = {
-							Off = Color3.fromRGB(30, 50, 70), 
-							On = Color3.fromRGB(65, 170, 255) 
-						},
-						Switch = {
-							Off = Color3.fromRGB(60, 100, 140), 
-							On = Color3.fromRGB(130, 210, 255) 
-						}
-					},
-					Slider = {
-						SliderBackground = Color3.fromRGB(65, 170, 255) 
-					},
-					Dropdown = {
-						DropdownBackground = Color3.fromRGB(20, 35, 45), 
-						Backdrop = Color3.fromRGB(15, 25, 35) 
-					}
-				}
-			},
-			Tabs = {
-				Background = {
-					Inactive = Color3.fromRGB(18, 30, 40), 
-					HoverNActive = Color3.fromRGB(22, 38, 48) 
-				},
-				Stroke = {
-					Inactive = Color3.fromRGB(25, 45, 65), 
-					HoverNActive = Color3.fromRGB(35, 65, 85) 
-				},
-				Text = Color3.fromRGB(100, 190, 255) 
-			}
-		},
-
-		Discord = {
-			Background = Color3.fromRGB(54, 57, 63), 
-			Seperators = Color3.fromRGB(47, 49, 54), 
-			ImageNText = {
-				Light = Color3.fromRGB(255, 255, 255), 
-				Dark = Color3.fromRGB(142, 146, 151), 
-				ReallyDark = Color3.fromRGB(114, 118, 125) 
-			},
-			Group = {
-				Title = Color3.fromRGB(255, 255, 255), 
-				Background = Color3.fromRGB(47, 49, 54), 
-				Items = {
-					ImageNText = {
-						Normal = Color3.fromRGB(142, 146, 151), 
-						Hover = Color3.fromRGB(255, 255, 255) 
-					},
-					Stroke = {
-						Normal = Color3.fromRGB(64, 68, 75), 
-						Hover = Color3.fromRGB(75, 78, 85) 
-					},
-					ExtraArea = Color3.fromRGB(41, 43, 47), 
-					Toggle = {
-						ToggleBackground = {
-							Off = Color3.fromRGB(64, 68, 75), 
-							On = Color3.fromRGB(88, 101, 242) 
-						},
-						Switch = {
-							Off = Color3.fromRGB(142, 146, 151), 
-							On = Color3.fromRGB(255, 255, 255) 
-						}
-					},
-					Slider = {
-						SliderBackground = Color3.fromRGB(88, 101, 242) 
-					},
-					Dropdown = {
-						DropdownBackground = Color3.fromRGB(47, 49, 54), 
-						Backdrop = Color3.fromRGB(41, 43, 47) 
-					}
-				}
-			},
-			Tabs = {
-				Background = {
-					Inactive = Color3.fromRGB(47, 49, 54), 
-					HoverNActive = Color3.fromRGB(54, 57, 63) 
-				},
-				Stroke = {
-					Inactive = Color3.fromRGB(64, 68, 75), 
-					HoverNActive = Color3.fromRGB(75, 78, 85) 
-				},
-				Text = Color3.fromRGB(142, 146, 151) 
-			}
-		},
-
-		Halloween = {
-			Background = Color3.fromRGB(20, 20, 25), 
-			Seperators = Color3.fromRGB(30, 25, 35), 
-			ImageNText = {
-				Light = Color3.fromRGB(255, 255, 255), 
-				Dark = Color3.fromRGB(255, 140, 0), 
-				ReallyDark = Color3.fromRGB(111, 0, 177) 
-			},
-			Group = {
-				Title = Color3.fromRGB(255, 117, 24), 
-				Background = Color3.fromRGB(25, 22, 30), 
-				Items = {
-					ImageNText = {
-						Normal = Color3.fromRGB(255, 140, 0), 
-						Hover = Color3.fromRGB(193, 82, 255) 
-					},
-					Stroke = {
-						Normal = Color3.fromRGB(50, 30, 60), 
-						Hover = Color3.fromRGB(70, 40, 90) 
-					},
-					ExtraArea = Color3.fromRGB(30, 25, 35), 
-					Toggle = {
-						ToggleBackground = {
-							Off = Color3.fromRGB(50, 30, 60), 
-							On = Color3.fromRGB(255, 117, 24) 
-						},
-						Switch = {
-							Off = Color3.fromRGB(90, 50, 120), 
-							On = Color3.fromRGB(255, 170, 0) 
-						}
-					},
-					Slider = {
-						SliderBackground = Color3.fromRGB(255, 117, 24) 
-					},
-					Dropdown = {
-						DropdownBackground = Color3.fromRGB(25, 22, 30), 
-						Backdrop = Color3.fromRGB(20, 20, 25) 
-					}
-				}
-			},
-			Tabs = {
-				Background = {
-					Inactive = Color3.fromRGB(25, 22, 30), 
-					HoverNActive = Color3.fromRGB(35, 28, 40) 
-				},
-				Stroke = {
-					Inactive = Color3.fromRGB(50, 30, 60), 
-					HoverNActive = Color3.fromRGB(70, 40, 90) 
-				},
-				Text = Color3.fromRGB(255, 140, 0) 
-			}
-		},
-
-		Arctic = {
-			Background = Color3.fromRGB(235, 245, 255), 
-			Seperators = Color3.fromRGB(220, 235, 255), 
-			ImageNText = {
-				Light = Color3.fromRGB(0, 0, 0), 
-				Dark = Color3.fromRGB(140, 180, 255), 
-				ReallyDark = Color3.fromRGB(80, 140, 255) 
-			},
-			Group = {
-				Title = Color3.fromRGB(100, 150, 255), 
-				Background = Color3.fromRGB(240, 248, 255), 
-				Items = {
-					ImageNText = {
-						Normal = Color3.fromRGB(130, 170, 255), 
-						Hover = Color3.fromRGB(80, 140, 255) 
-					},
-					Stroke = {
-						Normal = Color3.fromRGB(200, 225, 255), 
-						Hover = Color3.fromRGB(180, 215, 255) 
-					},
-					ExtraArea = Color3.fromRGB(245, 250, 255), 
-					Toggle = {
-						ToggleBackground = {
-							Off = Color3.fromRGB(200, 225, 255), 
-							On = Color3.fromRGB(100, 150, 255) 
-						},
-						Switch = {
-							Off = Color3.fromRGB(255, 255, 255), 
-							On = Color3.fromRGB(255, 255, 255) 
-						}
-					},
-					Slider = {
-						SliderBackground = Color3.fromRGB(100, 150, 255) 
-					},
-					Dropdown = {
-						DropdownBackground = Color3.fromRGB(240, 248, 255), 
-						Backdrop = Color3.fromRGB(235, 245, 255) 
-					}
-				}
-			},
-			Tabs = {
-				Background = {
-					Inactive = Color3.fromRGB(240, 248, 255), 
-					HoverNActive = Color3.fromRGB(230, 240, 255) 
-				},
-				Stroke = {
-					Inactive = Color3.fromRGB(200, 225, 255), 
-					HoverNActive = Color3.fromRGB(180, 215, 255) 
-				},
-				Text = Color3.fromRGB(100, 150, 255) 
-			}
-		},
-
-		Matrix = {
-			Background = Color3.fromRGB(0, 10, 0), 
-			Seperators = Color3.fromRGB(0, 20, 0), 
-			ImageNText = {
-				Light = Color3.fromRGB(0, 255, 0), 
-				Dark = Color3.fromRGB(0, 180, 0), 
-				ReallyDark = Color3.fromRGB(0, 100, 0) 
-			},
-			Group = {
-				Title = Color3.fromRGB(0, 255, 0), 
-				Background = Color3.fromRGB(5, 15, 5), 
-				Items = {
-					ImageNText = {
-						Normal = Color3.fromRGB(0, 200, 0), 
-						Hover = Color3.fromRGB(0, 255, 0) 
-					},
-					Stroke = {
-						Normal = Color3.fromRGB(0, 40, 0), 
-						Hover = Color3.fromRGB(0, 60, 0) 
-					},
-					ExtraArea = Color3.fromRGB(10, 20, 10), 
-					Toggle = {
-						ToggleBackground = {
-							Off = Color3.fromRGB(0, 40, 0), 
-							On = Color3.fromRGB(0, 255, 0) 
-						},
-						Switch = {
-							Off = Color3.fromRGB(0, 100, 0), 
-							On = Color3.fromRGB(0, 255, 0) 
-						}
-					},
-					Slider = {
-						SliderBackground = Color3.fromRGB(0, 255, 0) 
-					},
-					Dropdown = {
-						DropdownBackground = Color3.fromRGB(5, 15, 5), 
-						Backdrop = Color3.fromRGB(0, 10, 0) 
-					}
-				}
-			},
-			Tabs = {
-				Background = {
-					Inactive = Color3.fromRGB(5, 15, 5), 
-					HoverNActive = Color3.fromRGB(10, 20, 10) 
-				},
-				Stroke = {
-					Inactive = Color3.fromRGB(0, 40, 0), 
-					HoverNActive = Color3.fromRGB(0, 60, 0) 
-				},
-				Text = Color3.fromRGB(0, 200, 0) 
-			}
-		},
-
-		Blossom = {
-			Background = Color3.fromRGB(255, 250, 250), 
-			Seperators = Color3.fromRGB(255, 235, 235), 
-			ImageNText = {
-				Light = Color3.fromRGB(255, 255, 255), 
-				Dark = Color3.fromRGB(255, 182, 193), 
-				ReallyDark = Color3.fromRGB(199, 21, 133) 
-			},
-			Group = {
-				Title = Color3.fromRGB(255, 105, 180), 
-				Background = Color3.fromRGB(255, 245, 245), 
-				Items = {
-					ImageNText = {
-						Normal = Color3.fromRGB(219, 112, 147), 
-						Hover = Color3.fromRGB(255, 192, 203) 
-					},
-					Stroke = {
-						Normal = Color3.fromRGB(144, 238, 144), 
-						Hover = Color3.fromRGB(152, 251, 152) 
-					},
-					ExtraArea = Color3.fromRGB(255, 240, 245), 
-					Toggle = {
-						ToggleBackground = {
-							Off = Color3.fromRGB(230, 230, 230), 
-							On = Color3.fromRGB(255, 182, 193) 
-						},
-						Switch = {
-							Off = Color3.fromRGB(255, 255, 255), 
-							On = Color3.fromRGB(255, 105, 180) 
-						}
-					},
-					Slider = {
-						SliderBackground = Color3.fromRGB(255, 182, 193) 
-					},
-					Dropdown = {
-						DropdownBackground = Color3.fromRGB(255, 245, 245), 
-						Backdrop = Color3.fromRGB(255, 250, 250) 
-					}
-				}
-			},
-			Tabs = {
-				Background = {
-					Inactive = Color3.fromRGB(255, 245, 245), 
-					HoverNActive = Color3.fromRGB(255, 228, 225) 
-				},
-				Stroke = {
-					Inactive = Color3.fromRGB(255, 240, 245), 
-					HoverNActive = Color3.fromRGB(255, 228, 225) 
-				},
-				Text = Color3.fromRGB(219, 112, 147) 
-			}
-		},
-
-		Galaxy = {
-			Background = Color3.fromRGB(13, 2, 33), 
-			Seperators = Color3.fromRGB(22, 11, 44), 
-			ImageNText = {
-				Light = Color3.fromRGB(255, 255, 255), 
-				Dark = Color3.fromRGB(147, 112, 219), 
-				ReallyDark = Color3.fromRGB(75, 0, 130) 
-			},
-			Group = {
-				Title = Color3.fromRGB(255, 255, 255), 
-				Background = Color3.fromRGB(17, 5, 39), 
-				Items = {
-					ImageNText = {
-						Normal = Color3.fromRGB(138, 43, 226), 
-						Hover = Color3.fromRGB(216, 191, 216) 
-					},
-					Stroke = {
-						Normal = Color3.fromRGB(25, 13, 47), 
-						Hover = Color3.fromRGB(48, 25, 92) 
-					},
-					ExtraArea = Color3.fromRGB(20, 8, 43), 
-					Toggle = {
-						ToggleBackground = {
-							Off = Color3.fromRGB(47, 0, 100), 
-							On = Color3.fromRGB(123, 104, 238) 
-						},
-						Switch = {
-							Off = Color3.fromRGB(147, 112, 219), 
-							On = Color3.fromRGB(255, 255, 255) 
-						}
-					},
-					Slider = {
-						SliderBackground = Color3.fromRGB(148, 0, 211) 
-					},
-					Dropdown = {
-						DropdownBackground = Color3.fromRGB(17, 5, 39), 
-						Backdrop = Color3.fromRGB(13, 2, 33) 
-					}
-				}
-			},
-			Tabs = {
-				Background = {
-					Inactive = Color3.fromRGB(17, 5, 39), 
-					HoverNActive = Color3.fromRGB(22, 11, 44) 
-				},
-				Stroke = {
-					Inactive = Color3.fromRGB(25, 13, 47), 
-					HoverNActive = Color3.fromRGB(48, 25, 92) 
-				},
-				Text = Color3.fromRGB(147, 112, 219) 
-			}
-		},
-
-		Coffee = {
-			Background = Color3.fromRGB(43, 27, 20), 
-			Seperators = Color3.fromRGB(54, 34, 25), 
-			ImageNText = {
-				Light = Color3.fromRGB(255, 248, 220), 
-				Dark = Color3.fromRGB(139, 69, 19), 
-				ReallyDark = Color3.fromRGB(101, 67, 33) 
-			},
-			Group = {
-				Title = Color3.fromRGB(210, 180, 140), 
-				Background = Color3.fromRGB(47, 30, 22), 
-				Items = {
-					ImageNText = {
-						Normal = Color3.fromRGB(160, 120, 80), 
-						Hover = Color3.fromRGB(205, 175, 145) 
-					},
-					Stroke = {
-						Normal = Color3.fromRGB(65, 40, 30), 
-						Hover = Color3.fromRGB(85, 50, 35) 
-					},
-					ExtraArea = Color3.fromRGB(50, 33, 25), 
-					Toggle = {
-						ToggleBackground = {
-							Off = Color3.fromRGB(65, 40, 30), 
-							On = Color3.fromRGB(139, 69, 19) 
-						},
-						Switch = {
-							Off = Color3.fromRGB(160, 120, 80), 
-							On = Color3.fromRGB(210, 180, 140) 
-						}
-					},
-					Slider = {
-						SliderBackground = Color3.fromRGB(139, 69, 19) 
-					},
-					Dropdown = {
-						DropdownBackground = Color3.fromRGB(47, 30, 22), 
-						Backdrop = Color3.fromRGB(43, 27, 20) 
-					}
-				}
-			},
-			Tabs = {
-				Background = {
-					Inactive = Color3.fromRGB(47, 30, 22), 
-					HoverNActive = Color3.fromRGB(54, 34, 25) 
-				},
-				Stroke = {
-					Inactive = Color3.fromRGB(65, 40, 30), 
-					HoverNActive = Color3.fromRGB(85, 50, 35) 
-				},
-				Text = Color3.fromRGB(160, 120, 80) 
-			}
 		}
 	},
-	SelectedTheme = _G.ThemeJourne,
+	SelectedTheme = "Dark",
 	Connections = {},
 	SaveCfg = false,
 	Elements = {},
@@ -814,7 +286,7 @@ local function CreateCursor(frame, cursorId)
 	})
 
 	RunService.RenderStepped:Connect(function()
-		if Journe.SelectedTheme == "Light" or Journe.SelectedTheme == "Arctic" then
+		if Journe.SelectedTheme == "Light" then
 			cursor.ImageColor3 = Color3.new(0, 0, 0)
 		else
 			cursor.ImageColor3 = Color3.new(1, 1, 1)
@@ -991,7 +463,7 @@ function Journe:Notify(Settings)
 			BorderSizePixel = 0,
 			BackgroundColor3 = Journe.Themes[Journe.SelectedTheme].Background,
 			AnchorPoint = Vector2.new(1, 0.5),
-			Size = UDim2.new(0, 0, 0, 60),
+			Size = UDim2.new(1, 0, 0, 60),
 			Position = UDim2.new(1.09487, 0, 0.99998, 0),
 			BorderColor3 = Color3.fromRGB(0, 0, 0)
 		})
@@ -1023,7 +495,7 @@ function Journe:Notify(Settings)
 			Parent = Notification.Backdrop,
 			Name = "BackdropStroke",
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			Color = Journe.Themes[Journe.SelectedTheme].Seperators
+			Color = Color3.fromRGB(25, 25, 25)
 		})
 
 		Notification.Icon = Utilities.NewObject("ImageLabel", {
@@ -1049,10 +521,10 @@ function Journe:Notify(Settings)
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			TextSize = 15,
 			FontFace = Font.new("rbxassetid://11702779409", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
-			TextColor3 = Journe.Themes[Journe.SelectedTheme].ImageNText.Light,
+			TextColor3 = Journe.Themes[Journe.SelectedTheme].Group.Items.ImageNText.Light,
 			BackgroundTransparency = 1,
 			AnchorPoint = Vector2.new(0, 0.5),
-			Size = UDim2.new(1, 0, 1, 0),
+			Size = UDim2.new(1, -70, 1, 0),
 			BorderColor3 = Color3.fromRGB(0, 0, 0),
 			Text = Settings.Title,
 			Position = UDim2.new(0, 50, 0.5, 0)
@@ -1075,7 +547,7 @@ function Journe:Notify(Settings)
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			TextSize = 10,
 			FontFace = Font.new("rbxassetid://11702779409", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
-			TextColor3 = Journe.Themes[Journe.SelectedTheme].ImageNText.Dark,
+			TextColor3 = Journe.Themes[Journe.SelectedTheme].Group.Items.ImageNText.ReallyDark,
 			BackgroundTransparency = 1,
 			Size = UDim2.new(1, 0, 0, 40),
 			BorderColor3 = Color3.fromRGB(0, 0, 0),
@@ -1090,16 +562,14 @@ function Journe:Notify(Settings)
 		})
 
 		task.spawn(function()
-			RunService.RenderStepped:Connect(function()
-				Notification.Notification.Size = UDim2.new(0, Notification.Text.TextBounds.X + 80, 0, 60)
-			end)
 			task.wait(Settings.Duration)
 			Utilities.Tween(Notification.Notification, {
 				Goal = {Size = UDim2.new(0, 0, 0, 60)},
 				Duration = 1,
-				Callback = function()
+				Callback = coroutine.wrap(function()
+					task.wait(1)
 					Notification.Notification:Destroy()
-				end
+				end)
 			})
 		end)
 	end	
@@ -1145,7 +615,7 @@ function Journe:CreateWindow(Settings)
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				Size = UserInputService.TouchEnabled and UDim2.new(0, 553, 0, 384) or UDim2.new(0, 679, 0, 526),
-				Position = UDim2.new(0.5, 0, 0.5, 0),
+				Position = UDim2.new(0.4, 0, 0.5, 0),
 				BorderColor3 = Color3.fromRGB(0, 0, 0),
 				BackgroundTransparency = 1
 			})
@@ -1344,7 +814,7 @@ function Journe:CreateWindow(Settings)
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 14,
 				FontFace = Font.new("rbxassetid://11702779409", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
-				TextColor3 = Journe.Themes[Journe.SelectedTheme].ImageNText.Dark,
+				TextColor3 = Color3.fromRGB(109, 109, 109),
 				BackgroundTransparency = 1,
 				Size = UDim2.new(1, 0, 1, 0),
 				BorderColor3 = Color3.fromRGB(0, 0, 0),
@@ -1388,7 +858,7 @@ function Journe:CreateWindow(Settings)
 				Parent = Interface.TopBarAlternate,
 				Name = "SeperatorAlternate",
 				BorderSizePixel = 0,
-				BackgroundColor3 = Journe.Themes[Journe.SelectedTheme].Seperators,
+				BackgroundColor3 = Journe.Themes[Journe.SelectedTheme].Seperator,
 				Size = UDim2.new(1, 0, 0, 2),
 				Position = UDim2.new(0, 0, 1, 0),
 				BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -1417,7 +887,7 @@ function Journe:CreateWindow(Settings)
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 14,
 				FontFace = Font.new("rbxassetid://11702779409", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
-				TextColor3 = Journe.Themes[Journe.SelectedTheme].ImageNText.Dark,
+				TextColor3 = Color3.fromRGB(109, 109, 109),
 				BackgroundTransparency = 1,
 				Size = UDim2.new(1, 0, 1, 0),
 				BorderColor3 = Color3.fromRGB(0, 0, 0),
@@ -1753,7 +1223,7 @@ function Journe:CreateWindow(Settings)
 				Name = "Visibility",
 				BorderSizePixel = 0,
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				ImageColor3 = Journe.Themes[Journe.SelectedTheme].ImageNText.Dark,
+				ImageColor3 = Color3.fromRGB(109, 109, 109),
 				AnchorPoint = Vector2.new(0.5, 0),
 				Image = "rbxassetid://97376150985090",
 				Size = UDim2.new(0, 20, 0, 20),
@@ -1767,7 +1237,7 @@ function Journe:CreateWindow(Settings)
 				Name = "Discord",
 				BorderSizePixel = 0,
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				ImageColor3 = Journe.Themes[Journe.SelectedTheme].ImageNText.Dark,
+				ImageColor3 = Color3.fromRGB(109, 109, 109),
 				AnchorPoint = Vector2.new(0.5, 0),
 				Image = "rbxassetid://140455737059613",
 				Size = UDim2.new(0, 20, 0, 20),
@@ -1781,7 +1251,7 @@ function Journe:CreateWindow(Settings)
 				Name = "Youtube",
 				BorderSizePixel = 0,
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				ImageColor3 = Journe.Themes[Journe.SelectedTheme].ImageNText.Dark,
+				ImageColor3 = Color3.fromRGB(109, 109, 109),
 				AnchorPoint = Vector2.new(0.5, 0),
 				Image = "rbxassetid://135830546995228",
 				Size = UDim2.new(0, 20, 0, 20),
@@ -1817,7 +1287,7 @@ function Journe:CreateWindow(Settings)
 						Interface.ValueAlternate.Text = Data.BoundKey
 					end
 				end
-
+				
 				-- Bind
 				do
 					Interface.KeyBindAlternate.MouseEnter:Connect(function()
@@ -2653,7 +2123,7 @@ function Journe:CreateWindow(Settings)
 						MaxColumns = 2,
 						Width = UserInputService.TouchEnabled and 171 or 234
 					}
-
+					
 					Tab.GroupIndex += 1
 
 					do
@@ -4918,5 +4388,92 @@ function Journe:CreateWindow(Settings)
 
 	return Interface
 end
+
+local JourneUI = Journe:CreateWindow({
+	Theme = "Light"
+})
+
+local MainTab = JourneUI:CreateTab({
+	Title = "Main"
+})
+
+local Misc = JourneUI:CreateTab({
+	Title = "Misc"
+})
+
+local Autofarming = Misc:AddGroup({
+	Title = "Autofarming"
+})
+
+local Autofarming2 = Misc:AddGroup({
+	Title = "Autofarming2"
+})
+
+local Autofarming3 = Misc:AddGroup({
+	Title = "Autofarming3"
+})
+
+local Autofarming = MainTab:AddGroup({
+	Title = "Autofarming"
+})
+
+Autofarming:AddToggle({
+	Title = "Auto Mission/Raid"
+})
+
+Autofarming:AddToggle({
+	Title = "Auto Use Skills (Raid)"
+})
+
+Autofarming:AddToggle({
+	Title = "Open Second Raid Chest"
+})
+
+local Main = MainTab:AddGroup({
+	Title = "Main"
+})
+
+Main:AddToggle({
+	Title = "Titan Esp"
+})
+
+Main:AddToggle({
+	Title = "Nape Extension"
+})
+
+Main:AddToggle({
+	Title = "Nape Aimbot"
+})
+
+Main:AddToggle({
+	Title = "Grap Escape"
+})
+
+Main:AddToggle({
+	Title = "Auto Blade Reload"
+})
+
+Main:AddSlider({
+	Title = "Extension Range/Size",
+	Default = 2,
+	Max = 2,
+	Min = 0.5
+})
+
+local PremiumFeatures = MainTab:AddGroup({
+	Title = "Premium Features"
+})
+
+PremiumFeatures:AddToggle({
+	Title = "Titan Ripper (Premium)"
+})
+
+PremiumFeatures:AddToggle({
+	Title = "Auto Mission (Premium)"
+})
+
+local WebHook = JourneUI:CreateTab({
+	Title = "Webhook"
+})
 
 return Journe
