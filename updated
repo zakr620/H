@@ -1139,7 +1139,7 @@ function Journe:CreateWindow(Settings)
 													if Interface.Interface.Visible == true then
 														Utilities.Tween(Interface.CurrentPicker, {
 															Goal = {Position = UDim2.new(Interface.CurrentPicker.Position.X.Scale, Interface.CurrentPicker.Position.X.Offset - 135, Interface.CurrentPicker.Position.Y.Scale, Interface.CurrentPicker.Position.Y.Offset)},
-															Duration = 0.6,
+															Duration = 0.25,
 															EasingStyle = Enum.EasingStyle.Exponential,	
 															EasingDirection = Enum.EasingDirection.In,
 															Callback = function()
@@ -1151,7 +1151,7 @@ function Journe:CreateWindow(Settings)
 															Goal = {Position = UDim2.new(Interface.CurrentPicker.Position.X.Scale, Interface.CurrentPicker.Position.X.Offset + 135, Interface.CurrentPicker.Position.Y.Scale, Interface.CurrentPicker.Position.Y.Offset)},
 															EasingStyle = Enum.EasingStyle.Exponential,
 															EasingDirection = Enum.EasingDirection.In,
-															Duration = 0.6
+															Duration = 0.25
 														})
 													end
 												end
