@@ -1126,8 +1126,8 @@ function Journe:CreateWindow(Settings)
 
 									Variables.Transitioning = true
 
-									local showTop = Utilities.Transition(Interface.framesTop, 0, 0, 0.6, 0.3, 0.1, Variables.ShouldReverse)
-									local showBottom = Utilities.Transition(Interface.framesBottom, 0.5, 0, 0.6, 0.3, 0.1, Variables.ShouldReverse)
+									local showTop = Utilities.Transition(Interface.framesTop, 0, 0, 0.6, 0.1, 0.1, Variables.ShouldReverse)
+									local showBottom = Utilities.Transition(Interface.framesBottom, 0.5, 0, 0.6, 0.1, 0.1, Variables.ShouldReverse)
 
 									local connections = {}
 									local completed = 0
@@ -1170,8 +1170,8 @@ function Journe:CreateWindow(Settings)
 													end
 												end
 
-												Utilities.Transition(Interface.framesTop, -0.5, 0, 0.6, 0.3, 0.1, not Variables.ShouldReverse)
-												Utilities.Transition(Interface.framesBottom, 1, 0, 0.6, 0.3, 0.1, not Variables.ShouldReverse)
+												Utilities.Transition(Interface.framesTop, -0.5, 0, 0.6, 0.1, 0.1, not Variables.ShouldReverse)
+												Utilities.Transition(Interface.framesBottom, 1, 0, 0.6, 0.1, 0.1, not Variables.ShouldReverse)
 											end
 										end))
 									end
