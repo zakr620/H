@@ -1,0 +1,2014 @@
+--[=[
+MADE BY NOT A DEV 
+
+SHOULD ONLY BE USED BY TEKKIT
+
+IF YOU ARE NOT TEKKIT AND HAVE FOUND THIS LIBRARY YOU ARE A SCUMBAG LITTLE IDIOT
+AND I HOPE YOU DIE :]
+]=]--
+
+Azure = {
+	Instances = {},
+	DisableDrag = false
+}
+
+Theme = {
+	Default = {
+		Dark = Color3.fromRGB(15, 15, 15),
+		Light = Color3.fromRGB(255, 255, 255)
+	}
+}
+
+-- Declarations
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = game:GetService("Players").LocalPlayer
+local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
+local CoreGui = RunService:IsStudio() and LocalPlayer:WaitForChild("PlayerGui") or game:GetService("CoreGui")
+local Camera = workspace.CurrentCamera
+local Mouse = LocalPlayer:GetMouse()
+
+-- Helpers
+do
+	Object = {
+		New = function(Ins, Props, Child)
+			local Obj = Instance.new(Ins)
+
+			for Name, Value in pairs(Props or {}) do
+				Obj[Name] = Value
+
+				if typeof(Value) == "Color3" then
+					local Theme = (function() 
+						for i, v in pairs(Theme and Theme or {}) do 
+							if v == Value then 
+								return i 
+							end 
+						end 
+					end)()
+
+					if Theme then
+						Azure.Instances[Theme] = Azure.Instances[Theme] or {}
+						Azure.Instances[Theme][Name] = Azure.Instances[Theme][Name] or setmetatable({}, {_mode = "k"})
+						table.insert(Azure.Instances[Theme][Name], Obj)
+					end
+				end
+			end
+
+			for _, Module in pairs(Child or {}) do
+				Module.Parent = Obj
+			end
+
+			return Obj
+		end
+	}
+	
+	-- [[Pasted from flunt :] ]] --
+	DrawTriangle = function(v1, v2, v3, p0, p1)
+		local MTREL = "Glass"
+		local wedgeguid = "BlurMesh"
+
+		local acos, max, pi, sqrt = math.acos, math.max, math.pi, math.sqrt
+		local sz = 0.2
+		local s1 = (v1 - v2).magnitude
+		local s2 = (v2 - v3).magnitude
+		local s3 = (v3 - v1).magnitude
+		local smax = max(s1, s2, s3)
+		local A, B, C
+		if s1 == smax then
+			A, B, C = v1, v2, v3
+		elseif s2 == smax then
+			A, B, C = v2, v3, v1
+		elseif s3 == smax then
+			A, B, C = v3, v1, v2
+		end
+
+		local para = ( (B-A).x*(C-A).x + (B-A).y*(C-A).y + (B-A).z*(C-A).z ) / (A-B).magnitude
+		local perp = sqrt((C-A).magnitude^2 - para*para)
+		local dif_para = (A - B).magnitude - para
+
+		local st = CFrame.new(B, A)
+		local za = CFrame.Angles(pi/2,0,0)
+
+		local cf0 = st
+
+		local Top_Look = (cf0 * za).lookVector
+		local Mid_Point = A + CFrame.new(A, B).lookVector * para
+		local Needed_Look = CFrame.new(Mid_Point, C).lookVector
+		local dot = Top_Look.x*Needed_Look.x + Top_Look.y*Needed_Look.y + Top_Look.z*Needed_Look.z
+
+		local ac = CFrame.Angles(0, 0, acos(dot))
+
+		cf0 = cf0 * ac
+		if ((cf0 * za).lookVector - Needed_Look).magnitude > 0.01 then
+			cf0 = cf0 * CFrame.Angles(0, 0, -2*acos(dot))
+		end
+		cf0 = cf0 * CFrame.new(0, perp/2, -(dif_para + para/2))
+
+		local cf1 = st * ac * CFrame.Angles(0, pi, 0)
+		if ((cf1 * za).lookVector - Needed_Look).magnitude > 0.01 then
+			cf1 = cf1 * CFrame.Angles(0, 0, 2*acos(dot))
+		end
+		cf1 = cf1 * CFrame.new(0, perp/2, dif_para/2)
+
+		if not p0 then
+			p0 = Instance.new('Part')
+			p0.FormFactor = 'Custom'
+			p0.TopSurface = 0
+			p0.BottomSurface = 0
+			p0.Anchored = true
+			p0.CanCollide = false
+			p0.CastShadow = false
+			p0.Material = MTREL
+			p0.Size = Vector3.new(sz, sz, sz)
+			p0.Name = HttpService:GenerateGUID(true)
+			local mesh = Instance.new('SpecialMesh', p0)
+			mesh.MeshType = 2
+			mesh.Name = wedgeguid
+		end
+
+		local mesh0 = p0:FindFirstChild(wedgeguid)
+		if mesh0 then
+			mesh0.Scale = Vector3.new(0, perp/sz, para/sz)
+		end
+		p0.CFrame = cf0
+
+		if not p1 then
+			p1 = p0:clone()
+		end
+
+		local mesh1 = p1:FindFirstChild(wedgeguid)
+		if mesh1 then
+			mesh1.Scale = Vector3.new(0, perp/sz, dif_para/sz)
+		end
+		p1.CFrame = cf1
+
+		return p0, p1
+	end
+
+	DrawQuad = function(v1, v2, v3, v4, parts)
+		parts[1], parts[2] = DrawTriangle(v1, v2, v3, parts[1], parts[2])
+		parts[3], parts[4] = DrawTriangle(v3, v2, v4, parts[3], parts[4])
+	end
+
+	local Connections = {}
+	local Parts = {}
+
+	Blurify = {
+		Add = function(a1)
+			local Frame = Object.New("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.new(0.5, 0, 0.5, 0),
+				Size = UDim2.new(0.97, 0, 0.97, 0),
+				BackgroundTransparency = 1,
+				Parent = a1
+			})
+			
+			local parts = {}
+
+			local function IsVisible(instance)
+				while instance do
+					if instance:IsA("GuiObject") then
+						if not instance.Visible then
+							return false
+						end
+					elseif instance:IsA("ScreenGui") then
+						if not instance.Enabled then
+							return false
+						end
+						break
+					end
+					instance = instance.Parent
+				end
+				return true
+			end
+
+			local function UpdateOrientation(fetchProps)
+				local properties = {
+					Transparency = 0.98;
+					BrickColor = BrickColor.new('Institutional white');
+				}
+
+				local zIndex = 1 - 0.05*Frame.ZIndex
+
+				local tl, br = Frame.AbsolutePosition, Frame.AbsolutePosition + Frame.AbsoluteSize
+				local tr, bl = Vector2.new(br.x, tl.y), Vector2.new(tl.x, br.y)
+				do
+					local rot = Frame.Rotation
+					if rot ~= 0 and rot%180 ~= 0 then
+						local mid = tl:lerp(br, 0.5)
+						local s, c = math.sin(math.rad(rot)), math.cos(math.rad(rot))
+						tl = Vector2.new(c*(tl.x - mid.x) - s*(tl.y - mid.y), s*(tl.x - mid.x) + c*(tl.y - mid.y)) + mid
+						tr = Vector2.new(c*(tr.x - mid.x) - s*(tr.y - mid.y), s*(tr.x - mid.x) + c*(tr.y - mid.y)) + mid
+						bl = Vector2.new(c*(bl.x - mid.x) - s*(bl.y - mid.y), s*(bl.x - mid.x) + c*(bl.y - mid.y)) + mid
+						br = Vector2.new(c*(br.x - mid.x) - s*(br.y - mid.y), s*(br.x - mid.x) + c*(br.y - mid.y)) + mid
+					end
+				end
+				DrawQuad(
+					Camera:ScreenPointToRay(tl.x, tl.y, zIndex).Origin, 
+					Camera:ScreenPointToRay(tr.x, tr.y, zIndex).Origin, 
+					Camera:ScreenPointToRay(bl.x, bl.y, zIndex).Origin, 
+					Camera:ScreenPointToRay(br.x, br.y, zIndex).Origin, 
+					parts
+				)
+				if fetchProps then
+					for _, pt in pairs(parts) do
+						pt.Parent = Camera
+					end
+					for propName, propValue in pairs(properties) do
+						for _, pt in pairs(parts) do
+							pt[propName] = propValue
+						end
+					end
+				end
+			end
+
+			-- Clean up existing parts if they exist
+			if Parts[Frame] then
+				for _, part in pairs(Parts[Frame]) do
+					part:Destroy()
+				end
+				Parts[Frame] = nil
+			end
+
+			-- Clean up existing connection if it exists
+			if Connections[Frame] then
+				Connections[Frame]:Disconnect()
+				Connections[Frame] = nil
+			end
+
+			UpdateOrientation(true)
+			Parts[Frame] = parts
+			Connections[Frame] = game:GetService("RunService").RenderStepped:Connect(UpdateOrientation)
+		end,
+
+		Remove = function(Frame)
+			local connection = Connections[Frame]
+			if connection then
+				connection:Disconnect()
+				Connections[Frame] = nil
+			end
+
+			local frameParts = Parts[Frame]
+			if frameParts then
+				for _, part in pairs(frameParts) do
+					part:Destroy()
+				end
+				Parts[Frame] = nil
+			end
+		end,
+	}
+
+	Settings = function(defaults, options)
+		options = options or {}
+		local merged = {}
+
+		for k, v in pairs(defaults) do
+			merged[k] = v
+		end
+
+		for k, v in pairs(options) do
+			if defaults[k] ~= nil then
+				merged[k] = v
+			end
+		end
+
+		return merged
+	end
+
+	Tween = function(Objects, Options)
+		assert(type(Objects) == "table", "Objects must be a table")
+		assert(type(Options) == "table", "Options must be a table")
+
+		for i, object in ipairs(Objects) do
+			local option = Options[i]
+			assert(object, "Each object must be a valid instance")
+			assert(option, "Each object must have corresponding options")
+
+			local goal = option.Goal or {}
+			local duration = option.Duration or 0.15
+			local callback = option.Callback or function() end
+			local easingStyle = option.EasingStyle or Enum.EasingStyle.Sine
+			local easingDirection = option.EasingDirection or Enum.EasingDirection.Out
+			local tweenInfo = TweenInfo.new(
+				duration,
+				easingStyle,
+				easingDirection
+			)
+
+			local tween = TweenService:Create(object, tweenInfo, goal)
+			
+			tween:Play()
+			tween.Completed:Once(callback)
+		end
+	end
+
+	Dragify = function(DraggableFrame, FrameThatNeedsToBeVisible)
+		assert(DraggableFrame:IsA("GuiObject"), "DraggableFrame must be a GuiObject")
+		local dragging = false
+		local dragInput, mousePosition, framePosition
+
+		local function updateDrag(input)
+			local delta = input.Position - mousePosition
+			local newPosition = UDim2.new(
+				framePosition.X.Scale,
+				framePosition.X.Offset + delta.X,
+				framePosition.Y.Scale,
+				framePosition.Y.Offset + delta.Y
+			)
+			Tween({DraggableFrame}, {
+				{Goal = {Position = newPosition}, Duration = 0.05, EasingStyle = Enum.EasingStyle.Exponential, EasingDirection = Enum.EasingDirection.Out}
+			})
+		end
+
+		DraggableFrame.InputBegan:Connect(function(input)
+			if Azure.DisableDrag then return end
+
+			if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) 
+				and FrameThatNeedsToBeVisible.Visible then
+				dragging = true
+				mousePosition = input.Position
+				framePosition = DraggableFrame.Position
+
+				if UserInputService.TouchEnabled then
+					UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+					UserInputService.ModalEnabled = true
+					Camera.CameraType = Enum.CameraType.Scriptable
+				end
+
+				input.Changed:Connect(function()
+					if input.UserInputState == Enum.UserInputState.End then
+						dragging = false
+						if UserInputService.TouchEnabled then
+							UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+							UserInputService.ModalEnabled = false
+							Camera.CameraType = Enum.CameraType.Custom
+						end
+					end
+				end)
+			end
+		end)
+
+		DraggableFrame.InputChanged:Connect(function(input)
+			if Azure.DisableDrag then return end
+
+			if (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) 
+				and FrameThatNeedsToBeVisible.Visible then
+				dragInput = input
+			end
+		end)
+
+		UserInputService.InputChanged:Connect(function(input)
+			if Azure.DisableDrag then return end
+
+			if input == dragInput and dragging and FrameThatNeedsToBeVisible.Visible then
+				updateDrag(input)
+			end
+		end)
+	end
+
+	Cursify = function(BoundsFrame, CursorId)
+		assert(BoundsFrame and CursorId, "BoundsFrame and CursorId are required")
+		assert(BoundsFrame:IsA("GuiObject"), "BoundsFrame must be a GuiObject")
+		assert(type(CursorId) == "string" or type(CursorId) == "number", "CursorId must be a string or number")
+
+		local cursor = Object.New("ImageLabel", {
+			Name = "CustomCursor-" .. CursorId,
+			Size = UDim2.new(0, 20, 0, 20),
+			BackgroundTransparency = 1,
+			Image = "rbxassetid://" .. CursorId,
+			Parent = BoundsFrame.Parent,
+			ZIndex = 2147483647
+		})
+
+		RunService.RenderStepped:Connect(function()
+			local framePos = BoundsFrame.AbsolutePosition
+			local frameSize = BoundsFrame.AbsoluteSize
+			local isInFrame = Mouse.X >= framePos.X and Mouse.X <= framePos.X + frameSize.X and
+				Mouse.Y >= framePos.Y and Mouse.Y <= framePos.Y + frameSize.Y and
+				BoundsFrame.Visible
+
+			Tween({cursor}, {
+				{Goal = {Visible = isInFrame, BackgroundTransparency = isInFrame and 0 or 1}, Duration = 0.1}
+			})
+
+			UserInputService.MouseIconEnabled = not isInFrame
+
+			if isInFrame then
+				cursor.Position = UDim2.new(
+					0, Mouse.X - framePos.X - 2,
+					0, Mouse.Y - framePos.Y - 2
+				)
+			end
+		end)
+	end
+	
+	Input = function(Frame, Callbacks)
+		print[[Input]]
+
+		Callbacks = Callbacks or {}
+		local HoverOff = Callbacks.HoverOff or function() end
+		local HoverOn = Callbacks.HoverOn or function() end
+		local Click = Callbacks.Click or function() end
+		local UnClick = Callbacks.UnClick or function() end
+		local Dragging = Callbacks.Dragging or function() end
+		local UnDragging = Callbacks.EndDragging or function() end
+
+		local AllowDragging = false
+
+		Frame.InputBegan:Connect(function(Input)
+			if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+				AllowDragging = true
+				Click(Input)
+			end
+		end)
+
+		Frame.InputEnded:Connect(function(Input)
+			if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+				AllowDragging = false
+				UnClick()
+				UnDragging()
+			end
+		end)
+
+		Frame.InputChanged:Connect(function(Input)
+			if AllowDragging then
+				Dragging(Input)
+			end
+		end)
+
+		Frame.MouseEnter:Connect(HoverOn)
+		Frame.MouseLeave:Connect(HoverOff)
+	end
+end
+
+function Azure:Window(Options)
+	Options = Settings({
+		Title = "Azure UI Demo",
+		SubTitle = "Azure | Lib",
+		YouTubeLink = "https://www.youtube.com/@tekkit9070",
+		DiscordLink = "https://discord.gg/CXFxhXShwt",
+		MinimizeKey = "RightControl",
+		Theme = "Light",
+		Premium = false
+	}, Options)
+	
+	local Window = {
+		CurrentTab = nil,
+		Visible = true,
+		Premium = Options.Premium or false
+	}
+	
+	Window.Interface = Object.New("ScreenGui", {
+	    IgnoreGuiInset = true,
+	    ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets,
+	    Name = "Azure | UI (Journe-Horizontal)",
+	    ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+		ResetOnSpawn = false,
+		Parent = RunService:IsStudio() and LocalPlayer.PlayerGui or CoreGui
+	}, {
+	    Object.New("Frame", {
+	        BorderSizePixel = 0,
+	        BackgroundColor3 = Color3.fromRGB(16, 16, 16),
+	        AnchorPoint = Vector2.new(0.5, 0.5),
+	        Size = UDim2.new(0, 667, 0, 500),
+	        Position = UDim2.new(0.5, 0, 0.5, 0),
+	        BorderColor3 = Color3.fromRGB(0, 0, 0),
+	        Name = "Base",
+	        BackgroundTransparency = 0.05,
+	    }, {
+	        Object.New("UICorner", {
+	            Name = "Corner",
+	            CornerRadius = UDim.new(0, 6),
+	        }),
+	        Object.New("UIStroke", {
+	            Transparency = 0.9,
+	            ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+	            Name = "Stroke",
+	            Color = Color3.fromRGB(255, 255, 255),
+	        }),
+	        Object.New("Frame", {
+	            BorderSizePixel = 0,
+	            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	            Size = UDim2.new(0.325, 0, 1, -35),
+	            Position = UDim2.new(0, 0, 0, 0),
+	            BorderColor3 = Color3.fromRGB(0, 0, 0),
+	            Name = "Sidebar",
+	            BackgroundTransparency = 1,
+	        }, {
+	            Object.New("Frame", {
+	                BorderSizePixel = 0,
+	                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	                AnchorPoint = Vector2.new(1, 0),
+	                Size = UDim2.new(0, 1, 1, 0),
+	                Position = UDim2.new(1, 0, 0, 0),
+	                BorderColor3 = Color3.fromRGB(0, 0, 0),
+	                Name = "Divider",
+	                BackgroundTransparency = 0.9,
+	            }),
+	            Object.New("Frame", {
+	                BorderSizePixel = 0,
+	                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	                Size = UDim2.new(1, 0, 0, 46),
+	                BorderColor3 = Color3.fromRGB(0, 0, 0),
+	                Name = "Information",
+	                BackgroundTransparency = 1,
+	            }, {
+	                Object.New("Frame", {
+	                    BorderSizePixel = 0,
+	                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	                    AnchorPoint = Vector2.new(0, 1),
+	                    Size = UDim2.new(1, 0, 0, 1),
+	                    Position = UDim2.new(0, 0, 1, 0),
+	                    BorderColor3 = Color3.fromRGB(0, 0, 0),
+	                    Name = "Divider",
+	                    BackgroundTransparency = 0.9,
+	                }),
+	                Object.New("Frame", {
+	                    BorderSizePixel = 0,
+	                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	                    Size = UDim2.new(1, 0, 1, 0),
+	                    BorderColor3 = Color3.fromRGB(0, 0, 0),
+	                    Name = "Information_Container",
+	                    BackgroundTransparency = 1,
+	                }, {
+	                    Object.New("UIPadding", {
+	                        PaddingTop = UDim.new(0, 10),
+	                        PaddingRight = UDim.new(0, 22),
+	                        Name = "Padding",
+	                        PaddingLeft = UDim.new(0, 10),
+	                        PaddingBottom = UDim.new(0, 10),
+	                    }),
+	                    Object.New("Frame", {
+	                        BorderSizePixel = 0,
+	                        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	                        Size = UDim2.new(1, 0, 1, 0),
+	                        BorderColor3 = Color3.fromRGB(0, 0, 0),
+	                        Name = "Container",
+	                        BackgroundTransparency = 1,
+	                    }, {
+	                        Object.New("TextLabel", {
+	                            TextTruncate = Enum.TextTruncate.SplitWord,
+	                            BorderSizePixel = 0,
+	                            TextXAlignment = Enum.TextXAlignment.Left,
+	                            TextTransparency = 0.1,
+	                            TextYAlignment = Enum.TextYAlignment.Top,
+	                            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	                            TextSize = 13,
+	                            FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal),
+	                            TextColor3 = Color3.fromRGB(255, 255, 255),
+	                            BackgroundTransparency = 1,
+	                            RichText = true,
+	                            Size = UDim2.new(1, -20, 0, 0),
+	                            BorderColor3 = Color3.fromRGB(0, 0, 0),
+	                            Text = "Azure",
+	                            AutomaticSize = Enum.AutomaticSize.Y,
+	                            Name = "Title",
+	                        }),
+	                        Object.New("TextLabel", {
+	                            TextTruncate = Enum.TextTruncate.SplitWord,
+	                            BorderSizePixel = 0,
+	                            TextXAlignment = Enum.TextXAlignment.Left,
+	                            TextTransparency = 0.7,
+	                            TextYAlignment = Enum.TextYAlignment.Top,
+	                            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+	                            TextSize = 9,
+	                            FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+	                            TextColor3 = Color3.fromRGB(255, 255, 255),
+	                            BackgroundTransparency = 1,
+	                            RichText = true,
+	                            Size = UDim2.new(1, -20, 0, 0),
+	                            BorderColor3 = Color3.fromRGB(0, 0, 0),
+	                            Text = "Azure - Baseplate",
+	                            LayoutOrder = 1,
+	                            AutomaticSize = Enum.AutomaticSize.Y,
+	                            Name = "Subtitle",
+	                        }),
+	                        Object.New("UIListLayout", {
+	                            Padding = UDim.new(0, 3),
+	                            VerticalAlignment = Enum.VerticalAlignment.Center,
+	                            SortOrder = Enum.SortOrder.LayoutOrder,
+	                            Name = "List",
+	                        }),
+	                    }),
+	                }),
+	            }),
+				Object.New("Frame", {
+					Name = "Navigation",
+					Size = UDim2.new(1, 0, 1, -46),
+					Position = UDim2.new(0, 0, 0, 46),
+					BackgroundTransparency = 1,
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					BorderSizePixel = 0,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+				}, {
+					Object.New("UIPadding", {
+						Name = "Padding",
+						PaddingTop = UDim.new(0, 20),
+						PaddingRight = UDim.new(0, 5),
+						PaddingLeft = UDim.new(0, 5),
+					}),
+					Object.New("Frame", {
+						Name = "TabButtons",
+						Size = UDim2.new(1, 0, 1, -20),
+						BackgroundTransparency = 1,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						BorderSizePixel = 0,
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+					}, {
+						Object.New("ScrollingFrame", {
+							Name = "TabButtons_Container",
+							Size = UDim2.new(1, 0, 1, 0),
+							BackgroundTransparency = 1,
+							BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+							BorderSizePixel = 0,
+							BorderColor3 = Color3.fromRGB(0, 0, 0),
+							CanvasSize = UDim2.new(0, 0, 0, 0),
+							AutomaticCanvasSize = Enum.AutomaticSize.Y,
+							ScrollBarThickness = 1,
+							ScrollBarImageTransparency = 0.8,
+							TopImage = "",
+							BottomImage = "",
+						}, {
+							Object.New("UIPadding", {
+								Name = "Padding",
+								PaddingBottom = UDim.new(0, 15),
+							}),
+							Object.New("UIListLayout", {
+								Name = "List",
+								HorizontalAlignment = Enum.HorizontalAlignment.Center,
+								SortOrder = Enum.SortOrder.LayoutOrder,
+								Padding = UDim.new(0, 15),
+							}),
+						}),
+					}),
+				})
+	        }),
+			Object.New("Frame", {
+				Name = "BottomBar",
+				AnchorPoint = Vector2.new(0, 1),
+				Size = UDim2.new(1, 0, 0, 35),
+				Position = UDim2.new(0, 0, 1, 0),
+				BackgroundTransparency = 1,
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BorderSizePixel = 0,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+			}, {
+				Object.New("Frame", {
+					Name = "Divider",
+					Size = UDim2.new(1, 0, 0, 1),
+					BackgroundTransparency = 0.9,
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					BorderSizePixel = 0,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+				}),
+				Object.New("ImageLabel", {
+					Name = "Frame",
+					AnchorPoint = Vector2.new(1, 0.5),
+					Size = UDim2.new(0, 15, 0, 15),
+					Position = UDim2.new(1, -10, 0.5, 0),
+					BackgroundTransparency = 1,
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					Image = "rbxassetid://134327847638307",
+					ImageTransparency = 0.5,
+					BorderSizePixel = 0,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+				}),
+				Object.New("ImageLabel", {
+					Name = "Frame",
+					AnchorPoint = Vector2.new(1, 0.5),
+					Size = UDim2.new(0, 15, 0, 15),
+					Position = UDim2.new(1, -40, 0.5, 0),
+					BackgroundTransparency = 1,
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					Image = "rbxassetid://93588053073757",
+					ImageTransparency = 0.5,
+					BorderSizePixel = 0,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+				}),
+				Object.New("ImageLabel", {
+					Name = "Frame",
+					AnchorPoint = Vector2.new(1, 0.5),
+					Size = UDim2.new(0, 15, 0, 15),
+					Position = UDim2.new(1, -70, 0.5, 0),
+					BackgroundTransparency = 1,
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					Image = "rbxassetid://77851790097851",
+					ImageTransparency = 0.5,
+					BorderSizePixel = 0,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+				}),
+			}),
+			Object.New("Frame", {
+				Name = "Main",
+				AnchorPoint = Vector2.new(1, 0),
+				Size = UDim2.new(0, 450, 1, -35),
+				Position = UDim2.new(1, 0, 0, 0),
+				BackgroundTransparency = 1,
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BorderSizePixel = 0,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+			}, {
+				Object.New("Frame", {
+					Name = "Topbar",
+					Size = UDim2.new(1, 0, 0, 46),
+					BackgroundTransparency = 1,
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					BorderSizePixel = 0,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+				}, {
+					Object.New("Frame", {
+						Name = "Divider",
+						Size = UDim2.new(1, 0, 0, 1),
+						AnchorPoint = Vector2.new(0, 1),
+						Position = UDim2.new(0, 0, 1, 0),
+						BackgroundTransparency = 0.9,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						BorderSizePixel = 0,
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+					}),
+					Object.New("Frame", {
+						Name = "Container",
+						Size = UDim2.new(1, 0, 1, 0),
+						BackgroundTransparency = 1,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						BorderSizePixel = 0,
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+					}, {
+						Object.New("UIPadding", {
+							PaddingRight = UDim.new(0, 20),
+							PaddingLeft = UDim.new(0, 20),
+						}),
+						Object.New("TextLabel", {
+							Name = "CurrentTab",
+							Text = "Main",
+							TextSize = 11,
+							FontFace = Font.new([[rbxassetid://12187365364]], Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+							TextColor3 = Color3.fromRGB(255, 255, 255),
+							TextTransparency = 0.5,
+							TextXAlignment = Enum.TextXAlignment.Left,
+							TextYAlignment = Enum.TextYAlignment.Top,
+							BackgroundTransparency = 1,
+							Size = UDim2.new(0.9, 0, 0, 0),
+							AnchorPoint = Vector2.new(0, 0.5),
+							Position = UDim2.new(0, 0, 0.5, 0),
+							RichText = true,
+							AutomaticSize = Enum.AutomaticSize.Y,
+							BorderSizePixel = 0,
+							BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+							BorderColor3 = Color3.fromRGB(0, 0, 0),
+						}),
+					}),
+				}),
+				Object.New("Frame", {
+					Name = "Tabs",
+					Size = UDim2.new(1, 0, 1, -46),
+					Position = UDim2.new(0, 0, 0, 46),
+					BackgroundTransparency = 1,
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					BorderSizePixel = 0,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					ClipsDescendants = true,
+				}, {
+					Object.New("UIPadding", {
+						Name = "Padding",
+						PaddingTop = UDim.new(0, 10),
+						PaddingRight = UDim.new(0, 5),
+						PaddingBottom = UDim.new(0, 10),
+					}),
+				}),
+			})
+	    }),
+	})
+	
+	Blurify.Add(Window.Interface.Base)
+	Dragify(Window.Interface.Base, Window.Interface.Base)
+	-- Borken junk Cursify(Window.Interface.Base, 128944823463663)
+	
+	function Window:Tab(Options)
+		Options = Settings({
+			Title = "Tab",
+			Icon = "10734950309",
+			PremiumOnly = false
+		}, Options)
+		
+		local Tab = {
+			Active = false,
+			PremiumOnly = Options.PremiumOnly or false
+		}
+		
+		Tab.Button = Object.New("CanvasGroup", {
+			Name = "TabButton",
+			Active = true,
+			BorderSizePixel = 0,
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			Selectable = true,
+			AnchorPoint = Vector2.new(0.5, 0),
+			Size = UDim2.new(1, -26, 0, 30),
+			Position = UDim2.new(0.5, 0, 0, 0),
+			BorderColor3 = Color3.fromRGB(0, 0, 0),
+			LayoutOrder = 2,
+			BackgroundTransparency = 1,
+			Parent = Window.Interface.Base.Sidebar.Navigation.TabButtons.TabButtons_Container
+		}, {
+			Object.New("UICorner", {
+				Name = "Corner",
+				CornerRadius = UDim.new(0, 6)
+			}),
+			Object.New("UIStroke", {
+				Name = "Stroke",
+				Transparency = 1,
+				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+				Color = Color3.fromRGB(255, 255, 255)
+			}),
+			Object.New("ImageLabel", {
+				Name = "Image",
+				BorderSizePixel = 0,
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				ImageTransparency = 0.5,
+				AnchorPoint = Vector2.new(0, 0.5),
+				Image = "rbxassetid://" .. Options.Icon,
+				Size = UDim2.new(0, 13, 0, 13),
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BackgroundTransparency = 1,
+				Position = UDim2.new(0, 10, 0.5, 0)
+			}),
+			Object.New("TextLabel", {
+				Name = "Title",
+				TextTruncate = Enum.TextTruncate.SplitWord,
+				BorderSizePixel = 0,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				TextTransparency = 0.5,
+				TextYAlignment = Enum.TextYAlignment.Top,
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				TextSize = 11,
+				FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+				TextColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 1,
+				RichText = true,
+				AnchorPoint = Vector2.new(1, 0.5),
+				Size = UDim2.new(1, -46, 0, 0),
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				Text = Options.Title,
+				LayoutOrder = 1,
+				AutomaticSize = Enum.AutomaticSize.Y,
+				Position = UDim2.new(1, -13, 0.5, 0)
+			}),
+			Object.New("Frame", {
+				Name = "Selection",
+				BorderSizePixel = 0,
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				AnchorPoint = Vector2.new(0.5, 1),
+				Size = UDim2.new(0, 0, 0, 1),
+				Position = UDim2.new(0.5, 0, 1, 0),
+				BorderColor3 = Color3.fromRGB(0, 0, 0)
+			}, {
+				Object.New("UICorner", {
+					CornerRadius = UDim.new(111, 111)
+				})
+			})
+		})
+		
+		Tab.Container = Object.New("ScrollingFrame", {
+			Name = "Tabs_Container",
+			BorderSizePixel = 0,
+			CanvasSize = UDim2.new(0, 0, 1, 0),
+			TopImage = "",
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			ScrollBarImageTransparency = 0.8,
+			BottomImage = "",
+			AutomaticCanvasSize = Enum.AutomaticSize.Y,
+			ClipsDescendants = false,
+			Size = UDim2.new(1, 0, 1, 0),
+			BorderColor3 = Color3.fromRGB(0, 0, 0),
+			ScrollBarThickness = 1,
+			BackgroundTransparency = 1,
+			Parent = Window.Interface.Base.Main.Tabs,
+			Visible = false
+		}, {
+			Object.New("UIPadding", {
+				Name = "Padding",
+				PaddingTop = UDim.new(0, 5),
+				PaddingRight = UDim.new(0, 3),
+				PaddingLeft = UDim.new(0, 11),
+				PaddingBottom = UDim.new(0, 5)
+			}),
+			Object.New("UIListLayout", {
+				Name = "List",
+				Padding = UDim.new(0, 15),
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				FillDirection = Enum.FillDirection.Horizontal
+			}),
+			Object.New("Frame", {
+				Name = "Left",
+				BorderSizePixel = 0,
+				BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				Size = UDim2.new(0.5, -10, 0, 0),
+				Position = UDim2.new(0.512, 0, 0, 0),
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BackgroundTransparency = 1
+			}, {
+				Object.New("UIListLayout", {
+					Name = "List",
+					Padding = UDim.new(0, 15),
+					SortOrder = Enum.SortOrder.LayoutOrder
+				})
+			}),
+			Object.New("Frame", {
+				Name = "Right",
+				BorderSizePixel = 0,
+				BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				Size = UDim2.new(0.5, -10, 0, 0),
+				Position = UDim2.new(0.512, 0, 0, 0),
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				LayoutOrder = 1,
+				BackgroundTransparency = 1
+			}, {
+				Object.New("UIListLayout", {
+					Name = "List",
+					Padding = UDim.new(0, 15),
+					SortOrder = Enum.SortOrder.LayoutOrder
+				})
+			})
+		})
+		
+		function Tab:Set(Bool)
+			if Bool and Window.CurrentTab == Tab then
+				return
+			end
+
+			if Bool and (Tab.PremiumOnly and Window.Premium or not Tab.PremiumOnly) then
+				if Window.CurrentTab ~= nil then
+					Window.CurrentTab:Set(false)
+				end
+				
+				Tween({
+					Tab.Button,
+					Tab.Button.Title,
+					Tab.Button.Image,
+					Tab.Button.Selection
+				}, {
+					{Goal = { BackgroundTransparency = 0.98 }, Duration = 0.5},
+					{Goal = { TextTransparency = 0 }, Duration = 0.5},
+					{Goal = { ImageTransparency = 0 }, Duration = 0.5},
+					{Goal = { Size = UDim2.new(1, 0, 0, 1) }, Duration = 0.5}
+				})
+
+				Tab.Container.Visible = true
+				Tab.Active = true
+				Window.CurrentTab = Tab
+			else
+				Tween({
+					Tab.Button,
+					Tab.Button.Title,
+					Tab.Button.Image,
+					Tab.Button.Selection
+				}, {
+					{Goal = { BackgroundTransparency = 1 }, Duration = 0.5},
+					{Goal = { TextTransparency = 0.5 }, Duration = 0.5},
+					{Goal = { ImageTransparency = 0.5 }, Duration = 0.5},
+					{Goal = { Size = UDim2.new(0, 0, 0, 1) }, Duration = 0.5}
+				})
+
+				Tab.Container.Visible = false
+				Tab.Active = false
+			end
+		end
+		
+		Input(Tab.Button, {
+			HoverOff = function()
+				if Tab.Active then
+					return
+				end
+				
+				Tab.Hovering = false
+				Tween({
+					Tab.Button,
+					Tab.Button.Title,
+					Tab.Button.Image
+				}, {
+					{Goal = { BackgroundTransparency = 1 }, Duration = 0.5},
+					{Goal = { TextTransparency = 0.5 }, Duration = 0.5},
+					{Goal = { ImageTransparency = 0.5 }, Duration = 0.5}
+				})
+			end,
+			HoverOn = function()
+				if Tab.Active then
+					return
+				end
+				
+				Tab.Hovering = true
+				Tween({
+					Tab.Button,
+					Tab.Button.Title,
+					Tab.Button.Image
+				}, {
+					{Goal = { BackgroundTransparency = 0.98 }, Duration = 0.5},
+					{Goal = { TextTransparency = 0 }, Duration = 0.5},
+					{Goal = { ImageTransparency = 0 }, Duration = 0.5}
+				})
+			end,
+			Click = function()
+				Tab:Set(true)
+			end,
+		})
+		
+		function Tab:Group(Options)
+			Options = Settings({
+				Title = "Group",
+				Side = "Left"
+			}, Options)
+			
+			local Group = {}
+			
+			Group.Container = Object.New("Frame", {
+				BorderSizePixel = 0,
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				ClipsDescendants = true,
+				AutomaticSize = Enum.AutomaticSize.Y,
+				Size = UDim2.new(1, 0, 0, 0),
+				Position = UDim2.new(0, 0, 0, 0),
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				Name = "Group",
+				BackgroundTransparency = 0.98,
+				Parent = Tab.Container[Options.Side]
+			}, {
+				Object.New("UICorner", { Name = "Corner" }),
+				Object.New("UIStroke", {
+					Transparency = 0.95,
+					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+					Name = "Stroke",
+					Color = Color3.fromRGB(255, 255, 255)
+				}),
+				Object.New("UIListLayout", {
+					Padding = UDim.new(0, 10),
+					SortOrder = Enum.SortOrder.LayoutOrder,
+					Name = "List"
+				}),
+				Object.New("UIPadding", {
+					PaddingTop = UDim.new(0, 16),
+					PaddingRight = UDim.new(0, 13),
+					PaddingLeft = UDim.new(0, 15),
+					PaddingBottom = UDim.new(0, 15),
+					Name = "Padding"
+				}),
+				Object.New("Frame", {
+					BorderSizePixel = 0,
+					BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+					AutomaticSize = Enum.AutomaticSize.Y,
+					Size = UDim2.new(1, 0, 0, 0),
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					Name = "GroupTitle",
+					BackgroundTransparency = 1
+				}, {
+					Object.New("TextLabel", {
+						TextWrapped = true,
+						BorderSizePixel = 0,
+						TextXAlignment = Enum.TextXAlignment.Left,
+						TextTransparency = 0.3,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						TextSize = 12,
+						FontFace = Font.new([[rbxassetid://12187365364]], Enum.FontWeight.Medium, Enum.FontStyle.Normal),
+						TextColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						RichText = true,
+						Size = UDim2.new(1, 0, 0, 0),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text = Options.Title,
+						AutomaticSize = Enum.AutomaticSize.Y,
+						Name = "Title"
+					})
+				}),
+				Object.New("Frame", {
+					BorderSizePixel = 0,
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					AnchorPoint = Vector2.new(0, 1),
+					AutomaticSize = Enum.AutomaticSize.Y,
+					Size = UDim2.new(1, 0, 0, 1),
+					Position = UDim2.new(0, 0, 1, 0),
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					Name = "Divider",
+					BackgroundTransparency = 1
+				}, {
+					Object.New("Frame", {
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						Size = UDim2.new(1, 0, 0, 1),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Name = "Line",
+						BackgroundTransparency = 0.9
+					})
+				})
+			})
+			
+			function Group:Button(Options)
+				Options = Settings({
+					Title = "Button",
+					Callback = function() 
+						print[[Buttn!]]
+					end
+				}, Options)
+				
+				local Button = {}
+				
+				Button.Container = Object.New("Frame", {
+					BorderSizePixel = 0,
+					BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+					AutomaticSize = Enum.AutomaticSize.Y,
+					Size = UDim2.new(1, 0, 0, 29),
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					Name = "Button",
+					BackgroundTransparency = 1,
+					Parent = Group.Container
+				}, {
+					Object.New("ImageLabel", {
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						ImageTransparency = 0.5,
+						AnchorPoint = Vector2.new(1, 0.5),
+						Image = "rbxassetid://10709791437",
+						Size = UDim2.new(0, 15, 0, 15),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						BackgroundTransparency = 1,
+						Name = "Icon",
+						Position = UDim2.new(1, 0, 0.5, 0)
+					}),
+					Object.New("TextLabel", {
+						Active = true,
+						TextTruncate = Enum.TextTruncate.AtEnd,
+						BorderSizePixel = 0,
+						TextXAlignment = Enum.TextXAlignment.Left,
+						TextTransparency = 0.5,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						TextSize = 11,
+						FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+						TextColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						RichText = true,
+						Size = UDim2.new(1, 0, 1, 0),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text = Options.Title,
+						Selectable = true,
+						Name = "Title"
+					})
+				})
+				
+				Input(Button.Container, {
+					HoverOff = function()
+						Tween({
+							Button.Container.Title, 
+							Button.Container.Icon
+						}, {
+							{Goal = { TextTransparency = 0.5 }, Duration = 0.2},
+							{Goal = { ImageTransparency = 0.5 }, Duration = 0.2}
+						})
+					end,
+					HoverOn = function()
+						Tween({
+							Button.Container.Title, 
+							Button.Container.Icon
+						}, {
+							{Goal = { TextTransparency = 0 }, Duration = 0.2},
+							{Goal = { ImageTransparency = 0 }, Duration = 0.2}
+						})
+					end,
+					Click = function()
+						Tween({
+							Button.Container.Title, 
+							Button.Container.Icon
+						}, {
+							{Goal = { TextTransparency = 0 }, Duration = 0.2},
+							{Goal = { ImageTransparency = 0 }, Duration = 0.2}
+						})
+						Options.Callback()
+					end
+				})
+				
+				return Button
+			end
+			
+			function Group:Toggle(Options)
+				Options = Settings({
+					Title = "Toggle",
+					Default = false,
+					Callback = function(Value)
+						print(Value)
+					end   
+				}, Options)
+				
+				local Toggle = {
+					State = Options.Default
+				}
+				
+				Toggle.Container = Object.New("Frame", {
+					BorderSizePixel = 0,
+					BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+					AutomaticSize = Enum.AutomaticSize.Y,
+					Size = UDim2.new(1, 0, 0, 29),
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					Name = "Toggle",
+					BackgroundTransparency = 1,
+					Parent = Group.Container
+				}, {
+					Object.New("TextLabel", {
+						TextTruncate = Enum.TextTruncate.AtEnd,
+						BorderSizePixel = 0,
+						TextXAlignment = Enum.TextXAlignment.Left,
+						TextTransparency = 0.5,
+						TextYAlignment = Enum.TextYAlignment.Top,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						TextSize = 11,
+						FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+						TextColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						RichText = true,
+						AnchorPoint = Vector2.new(0, 0.5),
+						Size = UDim2.new(1, -50, 0, 0),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text = Options.Title,
+						AutomaticSize = Enum.AutomaticSize.Y,
+						Name = "Title",
+						Position = UDim2.new(0, 0, 0.5, 0)
+					}),
+					Object.New("ImageLabel", {
+						Active = true,
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						ImageTransparency = 0.5,
+						ImageColor3 = Color3.fromRGB(88, 87, 87),
+						AnchorPoint = Vector2.new(1, 0.5),
+						Image = "rbxassetid://18772190202",
+						Size = UDim2.new(0, 31, 0, 16),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						BackgroundTransparency = 1,
+						Selectable = true,
+						Name = "Toggle",
+						Position = UDim2.new(1, 0, 0.5, 0),
+					}, {
+						Object.New("ImageLabel", {
+							ZIndex = 2,
+							BorderSizePixel = 0,
+							BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+							ImageTransparency = 0.85,
+							AnchorPoint = Vector2.new(1, 0.5),
+							Image = "rbxassetid://18772309008",
+							Size = UDim2.new(0, 11, 0, 11),
+							BorderColor3 = Color3.fromRGB(0, 0, 0),
+							BackgroundTransparency = 1,
+							Name = "Head",
+							Position = UDim2.new(0.45, 0, 0.5, 0)
+						})
+					})
+				})
+				
+				function Toggle:Set(Bool)
+					if Bool == nil then
+						Toggle.State = not Toggle.State
+					else
+						Toggle.State = Bool
+					end
+					
+					if Toggle.State then
+						Tween({
+							Toggle.Container.Toggle,
+							Toggle.Container.Toggle.Head
+						}, {
+							{Goal = { ImageTransparency = 0 }, Duration = 0.2},
+							{Goal = { ImageTransparency = 0, Position = UDim2.new(1, -3, 0.5, 0) }, Duration = 0.2},
+						})
+					else
+						Tween({
+							Toggle.Container.Toggle,
+							Toggle.Container.Toggle.Head
+						}, {
+							{Goal = { ImageTransparency = 0.5 }, Duration = 0.2},
+							{Goal = { ImageTransparency = 0.85, Position = UDim2.new(0.45, 0, 0.5, 0) }, Duration = 0.2},
+						})
+					end
+				end
+				
+				Input(Toggle.Container, {
+					HoverOff = function()
+						Tween({
+							Toggle.Container.Title
+						}, {
+							{Goal = { TextTransparency = 0.5 }, Duration = 0.2}
+						})
+					end,
+					HoverOn = function()
+						Tween({
+							Toggle.Container.Title
+						}, {
+							{Goal = { TextTransparency = 0 }, Duration = 0.2}
+						})
+					end,
+					Click = function()
+						Tween({
+							Toggle.Container.Title
+						}, {
+							{Goal = { TextTransparency = 0 }, Duration = 0.2}
+						})
+						Toggle:Set()
+						Options.Callback(Toggle.State)
+					end
+				})
+				
+				Toggle:Set(Options.Default)
+				
+				return Toggle
+			end
+			
+			function Group:Slider(Options)
+				Options = Settings({
+					Title = "Slider",
+					Min = 0,
+					Max = 20,
+					Default = 5,
+					Increment = 0.01,
+					Callback = function(Value)
+						print(Value)
+					end   
+				}, Options)
+				
+				local Slider = {
+					Value = Options.Default,
+					Connection = nil
+				}
+				
+				Slider.Container = Object.New("Frame", {
+					BorderSizePixel = 0,
+					BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+					AutomaticSize = Enum.AutomaticSize.Y,
+					Size = UDim2.new(1, 0, 0, 39),
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					Name = "Slider",
+					BackgroundTransparency = 1,
+					Parent = Group.Container
+				}, {
+					Object.New("TextLabel", {
+						TextTruncate = Enum.TextTruncate.AtEnd,
+						BorderSizePixel = 0,
+						TextXAlignment = Enum.TextXAlignment.Left,
+						TextTransparency = 0.5,
+						TextYAlignment = Enum.TextYAlignment.Top,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						TextSize = 11,
+						FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+						TextColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						RichText = true,
+						AnchorPoint = Vector2.new(0, 0),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text = Options.Title,
+						AutomaticSize = Enum.AutomaticSize.XY,
+						Name = "Title",
+						Position = UDim2.new(0, 0, 0, 9)
+					}),
+					Object.New("TextBox", {
+						TextColor3 = Color3.fromRGB(255, 255, 255),
+						BorderSizePixel = 0,
+						TextTransparency = 0.1,
+						TextSize = 9,
+						Name = "NumberValue",
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+						AnchorPoint = Vector2.new(1, 0),
+						ClipsDescendants = true,
+						PlaceholderText = "??%",
+						Size = UDim2.new(0, 29, 0, 15),
+						Position = UDim2.new(1, 0, 0, 7),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text = "",
+						LayoutOrder = 1,
+						BackgroundTransparency = 0.95
+					}, {
+						Object.New("UICorner", {
+							Name = "SliderValueUICorner",
+							CornerRadius = UDim.new(0, 4)
+						}),
+						Object.New("UIStroke", {
+							Transparency = 0.9,
+							ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+							Name = "SliderValueUIStroke",
+							Color = Color3.fromRGB(255, 255, 255)
+						}),
+						Object.New("UIPadding", {
+							PaddingRight = UDim.new(0, 2),
+							Name = "SliderValueUIPadding",
+							PaddingLeft = UDim.new(0, 2)
+						})
+					}),
+					Object.New("ImageLabel", {
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						ImageColor3 = Color3.fromRGB(88, 87, 87),
+						Image = "rbxassetid://18772615246",
+						Size = UDim2.new(1, 0, 0, 3),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						BackgroundTransparency = 1,
+						Name = "Bar",
+						Position = UDim2.new(0, 0, 1, -5)
+					}, {
+						Object.New("ImageLabel", {
+							Active = true,
+							BorderSizePixel = 0,
+							BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+							AnchorPoint = Vector2.new(0.5, 0.5),
+							Image = "rbxassetid://18772834246",
+							Size = UDim2.new(0, 8, 0, 8),
+							BorderColor3 = Color3.fromRGB(0, 0, 0),
+							BackgroundTransparency = 1,
+							Selectable = true,
+							Name = "Head",
+							Position = UDim2.new(0.5, 0, 0.5, 0)
+						})
+					})
+				})
+				
+				function Slider:Set(Value)
+					Value = math.floor(Value / Options.Increment + 0.5) * Options.Increment
+					Value = math.floor(Value * 100 + 0.5) / 100
+
+					Slider.Value = math.clamp(Value, Options.Min, Options.Max)
+					Slider.Container.NumberValue.Text = tostring(self.Value)
+					local Percentage = (self.Value - Options.Min) / (Options.Max - Options.Min)
+					Slider.Container.Bar.Head.Position = UDim2.new(Percentage, 0, 0.5, 0)
+					Options.Callback(self.Value)
+				end
+				
+				function Slider:_Update(Input)
+					local AbsoluteBarPosition = Slider.Container.Bar.AbsolutePosition
+					local AbsoluteBarSize = Slider.Container.Bar.AbsoluteSize
+					local Percentage = math.clamp((Input.Position.X - AbsoluteBarPosition.X) / AbsoluteBarSize.X, 0, 1)
+					local Value = Options.Min + (Options.Max - Options.Min) * Percentage
+					Slider:Set(Value)
+				end
+				
+				Input(Slider.Container, {
+					HoverOff = function()
+						Tween({
+							Slider.Container.Title, 
+							--Button.Container.Icon
+						}, {
+							{Goal = { TextTransparency = 0.5 }, Duration = 0.2},
+							--{Goal = { ImageTransparency = 0.5 }, Duration = 0.2}
+						})
+					end,
+					HoverOn = function()
+						Tween({
+							Slider.Container.Title, 
+							--Button.Container.Icon
+						}, {
+							{Goal = { TextTransparency = 0 }, Duration = 0.2},
+							--{Goal = { ImageTransparency = 0 }, Duration = 0.2}
+						})
+					end,
+					Click = function(Input)
+						Tween({
+							Slider.Container.Title, 
+							--Button.Container.Icon
+						}, {
+							{Goal = { TextTransparency = 0 }, Duration = 0.2},
+							--{Goal = { ImageTransparency = 0 }, Duration = 0.2}
+						})
+						Options.Callback(Slider.Value)
+						Slider:_Update(Input)
+					end,
+					Dragging = function(Input)
+						Azure.DisableDrag = true
+						Slider:_Update(Input)
+					end,
+					UnDragging = function()
+						Azure.DisableDrag = false
+					end
+				})
+
+				Slider.Container.NumberValue.Focused:Connect(function()
+					Slider.Container.NumberValue.FocusLost:Wait()
+					local Value = tonumber(Slider.Container.NumberValue.Text)
+					if Value then
+						Slider:Set(Value)
+					else
+						Slider:Set(Slider.Value)
+					end
+				end)
+				
+				Slider:Set(Options.Default)
+				
+				return Slider
+			end
+			
+			function Group:Inputbox(Options)
+				Options = Settings({
+					Title = "Input",
+					Default = "",
+					Placeholder = "",
+					KeepText = true,
+					Callback = function(Value)
+						print(Value)
+					end,
+				}, Options)
+				
+				local Inputbox = {}
+				
+				Inputbox.Container = Object.New("Frame", {
+					Parent = Group.Container,
+					BorderSizePixel = 0,
+					BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+					AutomaticSize = Enum.AutomaticSize.Y,
+					Size = UDim2.new(1, 0, 0, 29),
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					Name = "Input",
+					BackgroundTransparency = 1,
+				}, {
+					Object.New("TextLabel", {
+						TextTruncate = Enum.TextTruncate.AtEnd,
+						BorderSizePixel = 0,
+						TextXAlignment = Enum.TextXAlignment.Left,
+						TextTransparency = 0.5,
+						TextYAlignment = Enum.TextYAlignment.Top,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						TextSize = 11,
+						FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+						TextColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						RichText = true,
+						AnchorPoint = Vector2.new(0, 0.5),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text = Options.Title,
+						AutomaticSize = Enum.AutomaticSize.XY,
+						Name = "Title",
+						Position = UDim2.new(0, 0, 0.5, 0),
+					}),
+					Object.New("TextBox", {
+						TextColor3 = Color3.fromRGB(255, 255, 255),
+						BorderSizePixel = 0,
+						TextXAlignment = Enum.TextXAlignment.Right,
+						TextTransparency = 0.1,
+						TextSize = 9,
+						Name = "Box",
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+						AutomaticSize = Enum.AutomaticSize.X,
+						AnchorPoint = Vector2.new(1, 0.5),
+						ClipsDescendants = true,
+						PlaceholderText = Options.Placeholder,
+						Size = UDim2.new(0, 21, 0, 15),
+						Position = UDim2.new(1, 0, 0.5, 0),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text = Options.Default,
+						ClearTextOnFocus = not Options.KeepText,
+						LayoutOrder = 1,
+						BackgroundTransparency = 0.95,
+					}, {
+						Object.New("UICorner", {
+							Name = "Corner",
+							CornerRadius = UDim.new(0, 4),
+						}),
+						Object.New("UIStroke", {
+							Transparency = 0.9,
+							ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+							Name = "Stroke",
+							Color = Color3.fromRGB(255, 255, 255),
+						}),
+						Object.New("UIPadding", {
+							PaddingRight = UDim.new(0, 5),
+							Name = "Padding",
+							PaddingLeft = UDim.new(0, 5),
+						}),
+						Object.New("UISizeConstraint", {
+							Name = "SizeConstraint",
+							MaxSize = Vector2.new(87, 8999999488),
+						}),
+					}),
+				})
+				
+				Input(Inputbox.Container, {
+					HoverOff = function()
+						Tween({
+							Inputbox.Container.Title,
+						}, {
+							{Goal = { TextTransparency = 0.5 }, Duration = 0.2}
+						})
+					end,
+					HoverOn = function()
+						Tween({
+							Inputbox.Container.Title,
+						}, {
+							{Goal = { TextTransparency = 0 }, Duration = 0.2}
+						})
+					end
+				})
+				
+				Inputbox.Container.Box.FocusLost:Connect(function()
+					Options.Callback(Inputbox.Container.Box.Text)
+				end)
+				
+				return Inputbox
+			end
+			
+			function Group:Keybind(Options)
+				Options = Settings({
+					Title = "Bind",
+					Default = Enum.KeyCode.E,
+					Hold = false,
+					Callback = function()
+						print("Pressed The Keybind")
+					end 
+				}, Options)
+				
+				local Keybind = {
+					CurrentKey = Options.Default
+				}
+				
+				Keybind.Container = Object.New("Frame", {
+					Parent = Group.Container,
+					BorderSizePixel = 0,
+					BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+					AutomaticSize = Enum.AutomaticSize.Y,
+					Size = UDim2.new(1, 0, 0, 29),
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					Name = "Keybind",
+					BackgroundTransparency = 1,
+				}, {
+					Object.New("TextLabel", {
+						TextTruncate = Enum.TextTruncate.AtEnd,
+						BorderSizePixel = 0,
+						TextXAlignment = Enum.TextXAlignment.Left,
+						TextTransparency = 0.5,
+						TextYAlignment = Enum.TextYAlignment.Top,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						TextSize = 11,
+						FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+						TextColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						RichText = true,
+						AnchorPoint = Vector2.new(0, 0.5),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text = Options.Title,
+						AutomaticSize = Enum.AutomaticSize.XY,
+						Name = "Title",
+						Position = UDim2.new(0, 0, 0.5, 0),
+					}),
+					Object.New("TextBox", {
+						TextColor3 = Color3.fromRGB(255, 255, 255),
+						BorderSizePixel = 0,
+						TextTransparency = 0.1,
+						TextSize = 9,
+						Name = "Box",
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+						AutomaticSize = Enum.AutomaticSize.X,
+						AnchorPoint = Vector2.new(1, 0.5),
+						ClipsDescendants = true,
+						PlaceholderText = string.sub(tostring(Options.Default), 13, -1) or "...",
+						Size = UDim2.new(0, 21, 0, 15),
+						Position = UDim2.new(1, 0, 0.5, 0),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text = "",
+						LayoutOrder = 1,
+						BackgroundTransparency = 0.95,
+					}, {
+						Object.New("UICorner", {
+							Name = "Corner",
+							CornerRadius = UDim.new(0, 4),
+						}),
+						Object.New("UIStroke", {
+							Transparency = 0.9,
+							ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+							Name = "Stroke",
+							Color = Color3.fromRGB(255, 255, 255),
+						}),
+						Object.New("UIPadding", {
+							PaddingRight = UDim.new(0, 5),
+							Name = "Padding",
+							PaddingLeft = UDim.new(0, 5),
+						}),
+						Object.New("UISizeConstraint", {
+							Name = "SizeConstraint",
+							MaxSize = Vector2.new(50, math.huge),
+						}),
+					}),
+				})
+				
+				function Keybind:SetBind(Key)
+					if Key == Keybind.CurrentKey then
+						return
+					end
+					
+					if Key then
+						if typeof(Key) == "EnumItem" and Key.EnumType == Enum.KeyCode then
+							Keybind.CurrentKey = Key
+							Keybind.Container.Box.Text = Key.Name
+						end
+					else
+						Keybind.CurrentKey = nil
+						Keybind.Container.Box.Text = "Unknown key..."
+						task.wait()
+						Keybind.Container.Box.Text = string.sub(tostring(Keybind.CurrentKey), 13, -1) or "..."
+					end
+				end
+				
+				Input(Keybind.Container, {
+					HoverOff = function()
+						Tween({
+							Keybind.Container.Title,
+						}, {
+							{Goal = { TextTransparency = 0.5 }, Duration = 0.2}
+						})
+					end,
+					HoverOn = function()
+						Tween({
+							Keybind.Container.Title,
+						}, {
+							{Goal = { TextTransparency = 0 }, Duration = 0.2}
+						})
+					end
+				})
+
+				Keybind.Container.Box.FocusLost:Connect(function()
+					Keybind:SetBind(Enum.KeyCode[string.upper(Keybind.Container.Box.Text)])
+				end)
+				
+				UserInputService.InputBegan:Connect(function(Key)
+					if Key.KeyCode == Keybind.CurrentKey then
+						Options.Callback()
+					end
+				end)
+
+				return Keybind
+			end
+			
+			function Group:Label(Options)
+				Options = Settings({
+					Content = "",
+					Important = false
+				})
+				
+				local Label = {}
+				
+				Label.Container = Object.New("Frame", {
+					Parent = Group.Container,
+					BorderSizePixel = 0,
+					BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+					AutomaticSize = Enum.AutomaticSize.Y,
+					Size = UDim2.new(1, 0, 0, 29),
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					Name = "Label",
+					BackgroundTransparency = 1,
+				}, {
+					Object.New("TextLabel", {
+						TextWrapped = true,
+						BorderSizePixel = 0,
+						TextXAlignment = Enum.TextXAlignment.Left,
+						TextTransparency = Options.Important == false and 0.5 or 0.2,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						TextSize = 11,
+						FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+						TextColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						RichText = true,
+						Size = UDim2.new(1, 0, 1, 0),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text = Options.Content,
+						AutomaticSize = Enum.AutomaticSize.Y,
+						Name = "Content",
+					}),
+				})
+				
+				Input(Label.Container, {
+					HoverOff = function()
+						Tween({
+							Label.Container.Content,
+						}, {
+							{Goal = { TextTransparency = 0.5 }, Duration = 0.2}
+						})
+					end,
+					HoverOn = function()
+						Tween({
+							Label.Container.Content,
+						}, {
+							{Goal = { TextTransparency = 0 }, Duration = 0.2}
+						})
+					end
+				})
+				
+				function Label:Set(Text)
+					Label.Container.Content.Text = Text
+				end
+
+				return Label
+			end
+			
+			function Group:Dropdown(Options)
+				Options = Settings({
+					Title = "",
+					Default = 1 or {1},
+					MultiSelect= false,
+					Callback = function(ItemId)
+						print(ItemId)
+					end,
+				})
+				
+				local Dropdown = {
+					Items = {}
+				}
+				
+				Dropdown.Container = Object.New("Frame", {
+					Name = "Dropdown",
+					Parent = Group.Container,
+					BorderSizePixel = 0,
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					ClipsDescendants = true,
+					AutomaticSize = Enum.AutomaticSize.Y,
+					Size = UDim2.new(1, 0, 0, 29),
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					BackgroundTransparency = 0.985,
+				}, {
+					Object.New("UIPadding", {
+						Name = "Padding",
+						PaddingRight = UDim.new(0, 10),
+						PaddingLeft = UDim.new(0, 10),
+					}),
+					Object.New("TextLabel", {
+						Name = "Title",
+						TextTruncate = Enum.TextTruncate.SplitWord,
+						BorderSizePixel = 0,
+						TextXAlignment = Enum.TextXAlignment.Left,
+						TextTransparency = 0.5,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						TextSize = 11,
+						FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal),
+						TextColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						RichText = true,
+						Size = UDim2.new(1, -20, 0, 29),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						Text =  Options.Title .. " - ",
+						AutomaticSize = Enum.AutomaticSize.Y,
+					}),
+					Object.New("UIStroke", {
+						Name = "Stroke",
+						Transparency = 0.95,
+						ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+						Color = Color3.fromRGB(255, 255, 255),
+					}),
+					Object.New("UICorner", {
+						Name = "Corner",
+						CornerRadius = UDim.new(0, 6),
+					}),
+					Object.New("ImageLabel", {
+						Name = "Icon",
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						ImageTransparency = 0.5,
+						AnchorPoint = Vector2.new(1, 0),
+						Image = "rbxassetid://122654076779969",
+						Size = UDim2.new(0, 13, 0, 13),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						BackgroundTransparency = 1,
+						Position = UDim2.new(1, 0, 0, 8),
+					}),
+					Object.New("Frame", {
+						Name = "Content",
+						BorderSizePixel = 0,
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						ClipsDescendants = true,
+						AutomaticSize = Enum.AutomaticSize.Y,
+						Size = UDim2.new(1, 0, 1, 0),
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						BackgroundTransparency = 1,
+						Visible = false,
+					}, {
+						Object.New("UIPadding", {
+							Name = "Padding",
+							PaddingTop = UDim.new(0, 38),
+							PaddingBottom = UDim.new(0, 10),
+						}),
+						Object.New("UIListLayout", {
+							Name = "List",
+							Padding = UDim.new(0, 5),
+							SortOrder = Enum.SortOrder.LayoutOrder,
+						}),
+						Object.New("Frame", {
+							Name = "SearchBar",
+							Active = false,
+							BorderSizePixel = 0,
+							BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+							Size = UDim2.new(1, 0, 0, 21),
+							BorderColor3 = Color3.fromRGB(0, 0, 0),
+							LayoutOrder = 2,
+							BackgroundTransparency = 0.95,
+						}, {
+							Object.New("TextBox", {
+								Name = "Box",
+								AnchorPoint = Vector2.new(1, 0),
+								Active = false,
+								BorderSizePixel = 0,
+								TextXAlignment = Enum.TextXAlignment.Left,
+								TextSize = 7,
+								TextColor3 = Color3.fromRGB(255, 255, 255),
+								BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+								Selectable = false,
+								PlaceholderText = "Search here...",
+								Size = UDim2.new(1, -28, 0, 21),
+								BorderColor3 = Color3.fromRGB(0, 0, 0),
+								Text = "",
+								LayoutOrder = 2,
+								BackgroundTransparency = 1,
+								TextTransparency = 0.1,
+								Position = UDim2.new(1, 0, 0, 0),
+								ClipsDescendants = true
+							}),
+							Object.New("UICorner", {
+								Name = "Corner",
+							}),
+							Object.New("ImageLabel", {
+								Name = "Icon",
+								BorderSizePixel = 0,
+								BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+								ImageColor3 = Color3.fromRGB(181, 181, 181),
+								AnchorPoint = Vector2.new(0, 0.5),
+								Image = "rbxassetid://86737463322606",
+								Size = UDim2.new(0, 8, 0, 8),
+								BorderColor3 = Color3.fromRGB(0, 0, 0),
+								BackgroundTransparency = 1,
+								Position = UDim2.new(0, 10, 0.5, 0),
+							}),
+							Object.New("UIPadding", {
+								Name = "Padding",
+								PaddingRight = UDim.new(0, 5)
+							}),
+						}),
+					}),
+				})
+				
+				Input(Dropdown.Container, {
+					HoverOff = function()
+						Tween({
+							Dropdown.Container.Title,
+							Dropdown.Container.Icon,
+						}, {
+							{Goal = { TextTransparency = 0.5 }, Duration = 0.2},
+							{Goal = { ImageTransparency = 0.5 }, Duration = 0.2}
+						})
+					end,
+					HoverOn = function()
+						Tween({
+							Dropdown.Container.Title,
+							Dropdown.Container.Icon,
+						}, {
+							{Goal = { TextTransparency = 0 }, Duration = 0.2},
+							{Goal = { ImageTransparency = 0 }, Duration = 0.2}
+						})
+					end
+				})
+				
+				return Dropdown
+			end
+			
+			return Group
+		end
+		
+		return Tab
+	end
+	
+	return Window
+end
+
+local Window = Azure:Window()
+
+local Tab = Window:Tab()
+
+local GroupLeft = Tab:Group({
+	Title = "Left one",
+	Side = "Left"
+})
+
+GroupLeft:Button()
+
+GroupLeft:Toggle()
+
+GroupLeft:Slider()
+
+GroupLeft:Inputbox()
+
+GroupLeft:Keybind()
+
+GroupLeft:Dropdown()
+
+local GroupRight = Tab:Group({
+	Title = "Right one",
+	Side = "Right"
+})
+
+local GroupRightAgain = Tab:Group({
+	Title = "Right one Again...",
+	Side = "Right"
+})
+
+Tab:Set(true)
+
+return Azure
