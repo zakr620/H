@@ -1978,37 +1978,4 @@ function Azure:Window(Options)
 	return Window
 end
 
-local Window = Azure:Window()
-
-local Tab = Window:Tab()
-
-local GroupLeft = Tab:Group({
-	Title = "Left one",
-	Side = "Left"
-})
-
-GroupLeft:Button()
-
-GroupLeft:Toggle()
-
-GroupLeft:Slider()
-
-GroupLeft:Inputbox()
-
-GroupLeft:Keybind()
-
-GroupLeft:Dropdown()
-
-local GroupRight = Tab:Group({
-	Title = "Right one",
-	Side = "Right"
-})
-
-local GroupRightAgain = Tab:Group({
-	Title = "Right one Again...",
-	Side = "Right"
-})
-
-Tab:Set(true)
-
 return Azure
