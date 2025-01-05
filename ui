@@ -1,3 +1,4 @@
+print("loading gui with fixes")
 --[=[
 MADE BY RICHNESS 
 
@@ -1701,7 +1702,7 @@ function Rise:Window(Options)
 					end
 					
 					if Toggle.State then
-						Options.Callback()
+						Options.Callback(Toggle.State)
 						Tween({
 							Toggle.Container.Toggle,
 							Toggle.Container.Toggle.Head
