@@ -1,4 +1,4 @@
-print("loading newerest gui")
+print("loading the newest gui")
 --[=[
 MADE BY RICHNESS 
 
@@ -19,6 +19,8 @@ Theme = {
 		Light = Color3.fromRGB(255, 255, 255)
 	}
 }
+
+
 
 -- Declarations
 local UserInputService = game:GetService("UserInputService")
@@ -1199,6 +1201,16 @@ function Rise:Window(Options)
 		end
 
 		return StatWindow
+	end
+
+	function Window:ToggleOpen()
+		Window.Enabled = not Window.Enabled
+
+		if Window.Enabled == true then
+			Window.Interface.Base.BackgroundTransparency = 0.05
+		elseif Window.Enabled == false then
+			Window.Interface.Base.BackgroundTransparency = 1
+		end
 	end
 
 	function Window:Tab(Options)
