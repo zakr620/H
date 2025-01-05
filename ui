@@ -1,5 +1,5 @@
 --[=[
-NEW ONE
+NEWEST ONE
 MADE BY RICHNESS 
 
 SHOULD ONLY BE USED BY TEKKIT
@@ -945,7 +945,7 @@ function Rise:Window(Options)
 					RichText = true,
 					Size = UDim2.new(1, -20, 0, 0),
 					BorderColor3 = Color3.fromRGB(0, 0, 0),
-					Text = Options.Title or "Azure",
+					Text = Options.Title or "Title",
 					AutomaticSize = Enum.AutomaticSize.Y,
 					Name = "Title",
 				}),
@@ -964,7 +964,7 @@ function Rise:Window(Options)
 					RichText = true,
 					Size = UDim2.new(1, -20, 0, 0),
 					BorderColor3 = Color3.fromRGB(0, 0, 0),
-					Text = Options.Subtitle or "Avery very long notification to test the longestness of the text warpping on the notification we are testin g this for design pursoses which is smosome one some what cool yeah",
+					Text = Options.Subtitle or "Subtitle",
 					LayoutOrder = 1,
 					AutomaticSize = Enum.AutomaticSize.Y,
 					Position = UDim2.new(0.51092, 0, -0.10299, 0),
@@ -1018,7 +1018,7 @@ function Rise:Window(Options)
 			setclipboard("https://www.youtube.com/@tekkit9070")
 			Window:Notify({
 				Title = "Link Copied!",
-				Subtitle = "The youtube link has been copied\n To your clipboard.",
+				Subtitle = "The youtube link has been copied to your clipboard.",
 				Duration = 6
 			})
 		end,
@@ -1043,7 +1043,7 @@ function Rise:Window(Options)
 			setclipboard(Options.DiscordLink)
 			Window:Notify({
 				Title = "Link Copied!",
-				Subtitle = "The discord link has been copied\n To your clipboard.",
+				Subtitle = "The discord link has been copied to your clipboard.",
 				Duration = 6
 			})
 		end,
