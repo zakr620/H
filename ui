@@ -1,4 +1,4 @@
-print("loading the newest gui")
+print("loading the latest gui")
 --[=[
 MADE BY RICHNESS 
 
@@ -1207,9 +1207,9 @@ function Rise:Window(Options)
 		Window.Enabled = not Window.Enabled
 
 		if Window.Enabled == true then
-			Window.Interface.Base.BackgroundTransparency = 0.05
+			Window.Interface.Base.Visible = true
 		elseif Window.Enabled == false then
-			Window.Interface.Base.BackgroundTransparency = 1
+			Window.Interface.Base.Visible = false
 		end
 	end
 
