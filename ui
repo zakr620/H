@@ -1,4 +1,3 @@
-print("loading gui with fixes")
 --[=[
 MADE BY RICHNESS 
 
@@ -881,56 +880,6 @@ function Rise:Window(Options)
 			end
 		end,
 	})
-	
-	Input(Window.Interface.Base.BottomBar.Youtube, {
-		HoverOff = function()
-			Tween({
-				Window.Interface.Base.BottomBar.Youtube,
-			}, {
-				{Goal = { ImageTransparency = 0.5 }, Duration = 0.5}
-			})
-		end,
-		HoverOn = function()
-			Tween({
-				Window.Interface.Base.BottomBar.Youtube,
-			}, {
-				{Goal = { ImageTransparency = 0 }, Duration = 0.5}
-			})
-		end,
-		Click = function()
-			setclipboard(Options.YoutubeLink)
-			Window:Notify({
-				Title = "Link Copied!",
-				Subtitle = "The youtube link has been copied\n To your clipboard.",
-				Duration = 6
-			})
-		end,
-	})
-
-	Input(Window.Interface.Base.BottomBar.Discord, {
-		HoverOff = function()
-			Tween({
-				Window.Interface.Base.BottomBar.Discord,
-			}, {
-				{Goal = { ImageTransparency = 0.5 }, Duration = 0.5}
-			})
-		end,
-		HoverOn = function()
-			Tween({
-				Window.Interface.Base.BottomBar.Discord,
-			}, {
-				{Goal = { ImageTransparency = 0 }, Duration = 0.5}
-			})
-		end,
-		Click = function()
-			setclipboard(Options.DiscordLink)
-			Window:Notify({
-				Title = "Link Copied!",
-				Subtitle = "The discord link has been copied\n To your clipboard.",
-				Duration = 6
-			})
-		end,
-	})
 
 	function Window:Notify(Options)
 		Options = Settings({
@@ -1048,6 +997,56 @@ function Rise:Window(Options)
 
 		return Notification
 	end
+
+	Input(Window.Interface.Base.BottomBar.Youtube, {
+		HoverOff = function()
+			Tween({
+				Window.Interface.Base.BottomBar.Youtube,
+			}, {
+				{Goal = { ImageTransparency = 0.5 }, Duration = 0.5}
+			})
+		end,
+		HoverOn = function()
+			Tween({
+				Window.Interface.Base.BottomBar.Youtube,
+			}, {
+				{Goal = { ImageTransparency = 0 }, Duration = 0.5}
+			})
+		end,
+		Click = function()
+			setclipboard("https://www.youtube.com/@tekkit9070")
+			Window:Notify({
+				Title = "Link Copied!",
+				Subtitle = "The youtube link has been copied\n To your clipboard.",
+				Duration = 6
+			})
+		end,
+	})
+
+	Input(Window.Interface.Base.BottomBar.Discord, {
+		HoverOff = function()
+			Tween({
+				Window.Interface.Base.BottomBar.Discord,
+			}, {
+				{Goal = { ImageTransparency = 0.5 }, Duration = 0.5}
+			})
+		end,
+		HoverOn = function()
+			Tween({
+				Window.Interface.Base.BottomBar.Discord,
+			}, {
+				{Goal = { ImageTransparency = 0 }, Duration = 0.5}
+			})
+		end,
+		Click = function()
+			setclipboard(Options.DiscordLink)
+			Window:Notify({
+				Title = "Link Copied!",
+				Subtitle = "The discord link has been copied\n To your clipboard.",
+				Duration = 6
+			})
+		end,
+	})
 	
 	function Window:StatWindow(Options)
 		Options = Settings({
