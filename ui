@@ -1,4 +1,4 @@
-print("loading newest ui")
+print("loading newerest gui")
 --[=[
 MADE BY RICHNESS 
 
@@ -863,12 +863,11 @@ function Rise:Window(Options)
 					Window.Interface.Base.Sidebar.Information.Information_Container.Padding
 				}, {
 					{ Goal = { Size = UDim2.new(0, 667, 0, 480) }, Duration = 0.5, Callback = function()
-						Window.Interface.Base.AnchorPoint = Vector2.new(0.5, 0.5)	
+						print("opening")	
 					end },
 					{ Goal = { PaddingLeft = UDim.new(0, 10), PaddingTop = UDim.new(0, 10) }, Duration = 0.5 }
 				})
 			else
-				Window.Interface.Base.AnchorPoint = Vector2.new(0.5, 1)
 				Tween({
 					Window.Interface.Base,
 					Window.Interface.Base.Sidebar.Information.Information_Container.Padding
