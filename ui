@@ -2029,6 +2029,10 @@ function Rise:Window(Options)
 				Inputbox.Container.Box.FocusLost:Connect(function()
 					Options.Callback(Inputbox.Container.Box.Text)
 				end)
+
+				function Inputbox:SetInputField(text)
+					Inputbox.Container.Box.Text = text
+				  end
 				
 				return Inputbox
 			end
@@ -3686,6 +3690,228 @@ function Rise:Window(Options)
 	end
 	
 	return Window
+end
+
+function Rise:Demo()
+
+	local Window = Rise:Window({
+		Title = "Tekkit",
+		SubTitle = "Tekkit | UI TESTING"
+	})
+
+	local StatWindow = Window:StatWindow()
+
+	StatWindow:Toggle(true)
+
+	StatWindow:Stat()
+
+	local Tab = Window:Tab()
+
+	local GroupLeft = Tab:Group({
+		Title = "Left one",
+		Side = "Left"
+	})
+
+	GroupLeft:Button()
+
+	GroupLeft:Toggle()
+
+	GroupLeft:Slider()
+
+	GroupLeft:Inputbox()
+
+	GroupLeft:Keybind()
+
+	--GroupLeft:Colorpicker()
+
+	local Dropdown = GroupLeft:Dropdown()
+
+	Dropdown:AddItem({
+		Title = "Default Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(15, 15, 15))
+			SetTheme("Light", Color3.fromRGB(255, 255, 255))
+			Window:Notify()
+		end,
+		Default = true
+	})
+
+	Dropdown:AddItem({
+		Title = "Light Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(240, 240, 240))
+			SetTheme("Light", Color3.fromRGB(0, 0, 0))
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Brown Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(62, 39, 35))
+			SetTheme("Light", Color3.fromRGB(199, 172, 162))
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Github Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(36, 41, 46))
+			SetTheme("Light", Color3.fromRGB(246, 248, 250))
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Spotify Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(25, 20, 20))
+			SetTheme("Light", Color3.fromRGB(30, 215, 96))
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Discord Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(54, 57, 63))
+			SetTheme("Light", Color3.fromRGB(114, 137, 218))
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Youtube Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(28, 28, 28)) -- Youtube's dark theme
+			SetTheme("Light", Color3.fromRGB(255, 255, 255))
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Roblox Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(50, 50, 50))
+			SetTheme("Light", Color3.fromRGB(240, 240, 240))
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Windows 11 Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(32, 33, 36))
+			SetTheme("Light", Color3.fromRGB(243, 243, 243))
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Terminal Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(0, 0, 0))
+			SetTheme("Light", Color3.fromRGB(0, 255, 0))
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Amoled Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(0, 0, 0))
+			SetTheme("Light", Color3.fromRGB(255, 255, 255))
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Darker Dark Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(10, 10, 10))
+			SetTheme("Light", Color3.fromRGB(220, 220, 220))
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Midnight Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(25, 25, 50)) -- Smooth blueish purple
+			SetTheme("Light", Color3.fromRGB(75, 75, 100))
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Bluloco Dark Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(38, 50, 56)) -- Dark blue-gray
+			SetTheme("Light", Color3.fromRGB(144, 202, 249)) -- Sky blue accents
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Shades of Purple Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(48, 10, 36)) -- Deep purple
+			SetTheme("Light", Color3.fromRGB(179, 136, 255)) -- Light purple accents
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Coffee Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(44, 32, 27)) -- Rich coffee brown
+			SetTheme("Light", Color3.fromRGB(181, 136, 99)) -- Light latte brown
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Metallic Chic Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(33, 33, 33)) -- Sleek dark gray
+			SetTheme("Light", Color3.fromRGB(192, 192, 192)) -- Metallic silver
+		end,
+	})
+
+	Dropdown:AddItem({
+		Title = "Deep Vintage Mood Theme",
+		Callback = function()
+			SetTheme("Dark", Color3.fromRGB(67, 54, 48)) -- Deep vintage brown
+			SetTheme("Light", Color3.fromRGB(214, 200, 187)) -- Muted vintage cream
+		end,
+	})
+
+	local GroupRight = Tab:Group({
+		Title = "Right one",
+		Side = "Right"
+	})
+
+	local GroupRightAgain = Tab:Group({
+		Title = "Right one Again...",
+		Side = "Right"
+	})
+
+	local Dropdown = GroupRightAgain:Dropdown({
+		Title = "MultiSelect!!",
+		MultiSelect = true
+	})
+
+	Dropdown:AddItem({
+
+	})
+
+	Dropdown:AddItem({
+
+	})
+
+	Dropdown:AddItem({
+
+	})
+
+	Dropdown:AddItem({
+
+	})
+
+	Dropdown:AddItem({
+
+	})
+
+	Dropdown:AddItem({
+
+	})
+
+	Tab:Set(true)
 end
 
 return Rise
