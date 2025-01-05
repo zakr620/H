@@ -1,4 +1,5 @@
 --[=[
+NEW ONE
 MADE BY RICHNESS 
 
 SHOULD ONLY BE USED BY TEKKIT
@@ -944,7 +945,7 @@ function Rise:Window(Options)
 					RichText = true,
 					Size = UDim2.new(1, -20, 0, 0),
 					BorderColor3 = Color3.fromRGB(0, 0, 0),
-					Text = "Azure",
+					Text = Options.Title or "Azure",
 					AutomaticSize = Enum.AutomaticSize.Y,
 					Name = "Title",
 				}),
@@ -963,7 +964,7 @@ function Rise:Window(Options)
 					RichText = true,
 					Size = UDim2.new(1, -20, 0, 0),
 					BorderColor3 = Color3.fromRGB(0, 0, 0),
-					Text = "Avery very long notification to test the longestness of the text warpping on the notification we are testin g this for design pursoses which is smosome one some what cool yeah",
+					Text = Options.Subtitle or "Avery very long notification to test the longestness of the text warpping on the notification we are testin g this for design pursoses which is smosome one some what cool yeah",
 					LayoutOrder = 1,
 					AutomaticSize = Enum.AutomaticSize.Y,
 					Position = UDim2.new(0.51092, 0, -0.10299, 0),
