@@ -437,11 +437,9 @@ do
 
 		local AllowDragging = false
 
-		Frame.InputBegan:Connect(function(Input)
-			if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-				AllowDragging = true
-				Click(Input)
-			end
+		Frame.Activated:Connect(function()
+			AllowDragging = true
+			Click()
 		end)
 
 		Frame.InputEnded:Connect(function(Input)
