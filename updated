@@ -1,7 +1,7 @@
 --[=[
 NEWEST ONE
 MADE BY RICHNESS 
-
+HEHEHEE
 SHOULD ONLY BE USED BY TEKKIT
 
 IF YOU ARE NOT TEKKIT AND HAVE FOUND THIS LIBRARY YOU ARE A SCUMBAG LITTLE IDIOT
@@ -436,10 +436,17 @@ do
 		local UnDragging = Callbacks.EndDragging or function() end
 
 		local AllowDragging = false
+		local TouchInput = nil
+		
+		Frame.InputBegan:Connect(function(Input)
+			if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+				AllowDragging = true
+				Click(Input)
 
-		Frame.Activated:Connect(function()
-			AllowDragging = true
-			Click()
+				if Input.UserInputType == Enum.UserInputType.Touch then
+					TouchInput = Input
+				end
+			end
 		end)
 
 		Frame.InputEnded:Connect(function(Input)
@@ -447,12 +454,18 @@ do
 				AllowDragging = false
 				UnClick()
 				UnDragging()
+
+				if Input == TouchInput then
+					TouchInput = nil
+				end
 			end
 		end)
 
 		Frame.InputChanged:Connect(function(Input)
 			if AllowDragging then
-				Dragging(Input)
+				if Input.UserInputType == Enum.UserInputType.Touch and Input == TouchInput or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+					Dragging(Input)
+				end
 			end
 		end)
 
