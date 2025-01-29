@@ -1,0 +1,137 @@
+local manager = {}
+manager.funcs = {}
+manager.loops = {}
+
+function manager:CreateFunc(name, func)
+    if self.funcs[name] then
+        warn("Function: " .. name .. " already exists")
+        return
+    end
+    self.funcs[name] = {Func = func}
+end
+
+function manager:RunFunc(name)
+    local func = self.funcs[name]
+    if not func then
+        warn("Function: " .. name .. " does not exist")
+        return
+    end
+
+    local succ , err = pcall(function ()
+        coroutine.wrap(func.Func)()
+    end)
+
+    if not succ then
+        warn(name .. " Error: " .. err)
+    end
+end
+
+function manager:NoLag(func)
+    local succ, err = pcall(function()
+        LPH_NO_VIRTUALIZE(function()
+            func()
+        end)()
+    end)
+
+    if not succ then
+        warn("Error in NoLag Function: " .. err)
+    end
+end
+
+function manager:MakeLoop(name, func, time)
+    self.loops[name] = {Running = false, Func = func, Time = time}
+end
+
+function manager:StopLoop(name)
+    if not self.loops[name] then
+        warn("Loop: " .. name .. " doesn't exist")
+        return
+    end
+
+    self.loops[name].Running = false
+end
+
+function manager:StartLoop(name)
+    if not self.loops[name] then
+        warn("Loop: " .. name .. " doesn't exist")
+        return
+    end
+
+    self.loops[name].Running = true
+    
+    spawn(function()
+        while self.loops[name].Running == true do
+            local succ, err = pcall(function()
+                self.loops[name].Func()
+            end)
+
+            if not succ then
+                warn("Loop: " .. name .. " Error: " .. err)
+            end
+            task.wait(self.loops[name].Time)
+        end
+    end)
+end
+
+function manager:ChangeLoopTimer(name, time)
+    if not self.loops[name] then
+        warn("Loop: " .. name .. " doesn't exist")
+        return
+    end
+
+    self.loops[name].Time = time
+end
+
+function manager:Notify(title, text)
+    s.startergui:SetCore("SendNotification", {
+        Title = title or "Undefined",
+        Text = text or "Undefined",
+    })
+end
+
+function manager:Toggle(object, title, default, func, variable)
+    local toggle = object:AddToggle({
+        Title = title or "Undefined",
+        Default = default or false,
+        Callback = func or function(Value) print("Toggle: Func not defined") end
+    })
+
+    toggle:SetState(variable)
+
+    return toggle
+end
+
+function manager:Button(object, title, func)
+    local button = object:AddButton({
+        Title = title or "Undefined",
+        Callback = func or function() print("Button: Func not defined") end
+    })
+end
+
+function manager:InputBox(object, title, func, variable)
+    local box = object:AddInput({
+        Title = title or "Undefined",
+        Callback = func or function() print("Undefined input callback") end
+    })
+
+    if type(variable) == "string" then
+        box:SetInputField(variable)
+    else
+        box:SetInputField(tostring(variable))
+    end
+end
+
+function manager:Slider(object, title, min, max, default, increment, func, variable)
+    local slider = object:AddSlider({
+        Title = title or "Undefined",
+        Min = min or 0,
+        Max = max or 10,
+        Default = default or 5,
+        Increment = increment or 1,
+        Callback = func or function() print("Slider: func not defined") end
+    })
+
+    slider:SetValue(variable)
+end
+
+return manager
