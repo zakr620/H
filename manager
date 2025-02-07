@@ -38,15 +38,11 @@ function manager:RunFunc(name)
 end
 
 function manager:NoLag(func)
-    local succ, err = pcall(function()
+    pcall(function()
         LPH_NO_VIRTUALIZE(function()
             func()
         end)()
     end)
-
-    if not succ then
-        print("Error in NoLag Function: " .. err)
-    end
 end
 
 function manager:MakeLoop(name, func, time)
