@@ -1,3 +1,15 @@
+local s = {
+    wp = game:GetService("Workspace"),
+    reps = game:GetService("ReplicatedStorage"),
+    tweenserv = game:GetService("TweenService"),
+    guiserv = game:GetService("GuiService"),
+    players = game:GetService("Players"),
+    http = game:GetService("HttpService"),
+    startergui = game:GetService("StarterGui"),
+    vip = game:GetService("VirtualInputManager")
+}
+
+
 local manager = {}
 manager.funcs = {}
 manager.loops = {}
