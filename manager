@@ -1,20 +1,9 @@
 local manager = {}
 manager.funcs = {}
 manager.loops = {}
-local s = {
-    wp = game:GetService("Workspace"),
-    reps = game:GetService("ReplicatedStorage"),
-    tweenserv = game:GetService("TweenService"),
-    guiserv = game:GetService("GuiService"),
-    players = game:GetService("Players"),
-    http = game:GetService("HttpService"),
-    startergui = game:GetService("StarterGui"),
-    vip = game:GetService("VirtualInputManager")
-}
-
 function manager:CreateFunc(name, func)
     if self.funcs[name] then
-        warn("Function: " .. name .. " already exists")
+        print("Function: " .. name .. " already exists")
         return
     end
     self.funcs[name] = {Func = func}
@@ -23,7 +12,7 @@ end
 function manager:RunFunc(name)
     local func = self.funcs[name]
     if not func then
-        warn("Function: " .. name .. " does not exist")
+        print("Function: " .. name .. " does not exist")
         return
     end
 
@@ -32,7 +21,7 @@ function manager:RunFunc(name)
     end)
 
     if not succ then
-        warn(name .. " Error: " .. err)
+        print(name .. " Error: " .. err)
     end
 end
 
@@ -44,7 +33,7 @@ function manager:NoLag(func)
     end)
 
     if not succ then
-        warn("Error in NoLag Function: " .. err)
+        print("Error in NoLag Function: " .. err)
     end
 end
 
@@ -54,7 +43,7 @@ end
 
 function manager:StopLoop(name)
     if not self.loops[name] then
-        warn("Loop: " .. name .. " doesn't exist")
+        print("Loop: " .. name .. " doesn't exist")
         return
     end
 
@@ -63,7 +52,7 @@ end
 
 function manager:StartLoop(name)
     if not self.loops[name] then
-        warn("Loop: " .. name .. " doesn't exist")
+        print("Loop: " .. name .. " doesn't exist")
         return
     end
 
@@ -76,7 +65,7 @@ function manager:StartLoop(name)
             end)
 
             if not succ then
-                warn("Loop: " .. name .. " Error: " .. err)
+                print("Loop: " .. name .. " Error: " .. err)
             end
             task.wait(self.loops[name].Time)
         end
@@ -85,7 +74,7 @@ end
 
 function manager:ChangeLoopTimer(name, time)
     if not self.loops[name] then
-        warn("Loop: " .. name .. " doesn't exist")
+        print("Loop: " .. name .. " doesn't exist")
         return
     end
 
