@@ -2007,7 +2007,7 @@ function MacLib:Window(Settings)
 						SliderFunctions.Value = finalValue
 					end
 
-					SetValue(SliderFunctions.Settings.Default, true)
+					SetValue(SliderFunctions.Settings.Default, false)
 
 					sliderHead.InputBegan:Connect(function(input)
 						if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
