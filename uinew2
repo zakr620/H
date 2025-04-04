@@ -56,6 +56,7 @@ local function GetGui()
 	local parent = LocalPlayer:FindFirstChild("PlayerGui")
 
 	newGui.Parent = parent
+	newGui.Name = "instancedgui"
 	return newGui
 end
 
