@@ -13,37 +13,6 @@ local s = {
 local manager = {}
 manager.funcs = {}
 manager.loops = {}
-function manager:CreateFunc(name, func)
-    if self.funcs[name] then
-        print("Function: " .. name .. " already exists")
-        return
-    end
-    self.funcs[name] = {Func = func}
-end
-
-function manager:RunFunc(name)
-    local func = self.funcs[name]
-    if not func then
-        print("Function: " .. name .. " does not exist")
-        return
-    end
-
-    local succ , err = pcall(function ()
-        coroutine.wrap(func.Func)()
-    end)
-
-    if not succ then
-        print(name .. " Error: " .. err)
-    end
-end
-
-function manager:NoLag(func)
-    pcall(function()
-        LPH_NO_VIRTUALIZE(function()
-            func()
-        end)()
-    end)
-end
 
 function manager:MakeLoop(name, func, time)
     self.loops[name] = {Running = false, Func = func, Time = time}
