@@ -24,7 +24,9 @@ function manager:StopLoop(name)
         return
     end
 
-    self.loops[name].Running = false
+    if self.loops[name].Running == true then
+        self.loops[name].Running = false
+    end
 end
 
 function manager:StartLoop(name)
@@ -33,20 +35,22 @@ function manager:StartLoop(name)
         return
     end
 
-    self.loops[name].Running = true
-    
-    spawn(function()
-        while self.loops[name].Running == true do
-            local succ, err = pcall(function()
-                self.loops[name].Func()
-            end)
+    if self.loops[name].Running ~= true then 
+        self.loops[name].Running = true 
 
-            if not succ then
-                print("Loop: " .. name .. " Error: " .. err)
+        spawn(function()
+            while self.loops[name].Running == true do
+                local succ, err = pcall(function()
+                    self.loops[name].Func()
+                end)
+    
+                if not succ then
+                    print("Loop: " .. name .. " Error: " .. err)
+                end
+                task.wait(self.loops[name].Time)
             end
-            task.wait(self.loops[name].Time)
-        end
-    end)
+        end)
+    end
 end
 
 function manager:ChangeLoopTimer(name, time)
@@ -65,49 +69,61 @@ function manager:Notify(title, text)
     })
 end
 
-function manager:Toggle(object, title, default, func, variable)
-    local toggle = object:AddToggle({
-        Title = title or "Undefined",
-        Default = default or false,
-        Callback = func or function(Value) print("Toggle: Func not defined") end
-    })
-
-    toggle:SetState(variable)
+function manager:Toggle(object, title, flag, func)
+    local toggle = object:Toggle({
+        Name = title or "Undefined",
+        Default = false,
+        Callback = func or function() end,
+    }, tostring(flag))
 
     return toggle
 end
 
 function manager:Button(object, title, func)
-    local button = object:AddButton({
-        Title = title or "Undefined",
-        Callback = func or function() print("Button: Func not defined") end
+    local button = object:Button({
+        Name = title or "undefined",
+        Callback = func or function() end
     })
+
+    return button
 end
 
-function manager:InputBox(object, title, func, variable)
-    local box = object:AddInput({
-        Title = title or "Undefined",
-        Callback = func or function() print("Undefined input callback") end
-    })
+function manager:InputBox(object, title, flag, func)
+    local box = object:Input({
+        Name = title or "undefined",
+        Placeholder = "",
+        AcceptedCharacters = "All",
+        Callback = func or function() end,
+    }, tostring(flag) or "undefined")
 
-    if type(variable) == "string" then
-        box:SetInputField(variable)
-    else
-        box:SetInputField(tostring(variable))
-    end
+    return box
 end
 
-function manager:Slider(object, title, min, max, default, increment, func, variable)
-    local slider = object:AddSlider({
-        Title = title or "Undefined",
-        Min = min or 0,
-        Max = max or 10,
-        Default = default or 5,
-        Increment = increment or 1,
-        Callback = func or function() print("Slider: func not defined") end
-    })
+function manager:Slider(object, title, default, min, max, display, flag, func)
+    local slider = object:Slider({
+        Name = title or "undefined",
+        Default = default or 10,
+        Minimum = min or 1,
+        Maximum = max or 20,
+        DisplayMethod = display or "Tenths",
+        Callback = func or function() end,
+    }, tostring(flag) or "undefined")
 
-    slider:SetValue(variable)
+    return slider
+end
+
+function manager:Dropdown(object, title, multi, options, default, flag, func)
+    local Dropdown = object:Dropdown({
+        Name = title or "undefined",
+        Search = false,
+        Multi = multi or false,
+        Required = false,
+        Options = options or {},
+        Default = default or {},
+        Callback = func or function() end,
+    }, tostring(flag) or "undefined")
+
+    return Dropdown
 end
 
 return manager
