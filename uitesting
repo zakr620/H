@@ -5368,6 +5368,9 @@ function MacLib:Window(Settings)
 	function WindowFunctions:GetScale()
 		return baseUIScale.Scale
 	end
+	function WindowFunctions:GetBase()
+		return base
+	end
 
 	local ClassParser = {
 		["Toggle"] = {
