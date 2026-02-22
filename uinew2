@@ -53,10 +53,12 @@ local function GetGui()
 	newGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	newGui.DisplayOrder = 2147483647
 
-	local parent = LocalPlayer:FindFirstChild("PlayerGui")
+	local parent = RunService:IsStudio() 
+		and LocalPlayer:FindFirstChild("PlayerGui")
+		or (gethui and gethui())
+		or (cloneref and cloneref(MacLib.GetService("CoreGui")) or MacLib.GetService("CoreGui"))
 
 	newGui.Parent = parent
-	newGui.Name = "instancedgui"
 	return newGui
 end
 
@@ -2008,7 +2010,7 @@ function MacLib:Window(Settings)
 						SliderFunctions.Value = finalValue
 					end
 
-					SetValue(SliderFunctions.Settings.Default, false)
+					SetValue(SliderFunctions.Settings.Default, true)
 
 					sliderHead.InputBegan:Connect(function(input)
 						if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -2077,7 +2079,7 @@ function MacLib:Window(Settings)
 						slider.Visible = State
 					end
 					function SliderFunctions:UpdateValue(Value)
-						SetValue(tonumber(Value), false)
+						SetValue(tonumber(Value), true)
 					end
 					function SliderFunctions:GetValue()
 						return finalValue
