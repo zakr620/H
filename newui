@@ -2858,14 +2858,32 @@ function MacLib:Window(Settings)
 						}
 
 						local isSelected = false
-						if DropdownFunctions.Settings.Default then
-							if DropdownFunctions.Settings.Multi then
-								isSelected = table.find(DropdownFunctions.Settings.Default, v) and true or false
-							else
-								isSelected = (DropdownFunctions.Settings.Default == i) and true or false
-							end
-						end
-						Toggle(v, isSelected)
+                        if DropdownFunctions.Settings.Default then
+                            if DropdownFunctions.Settings.Multi then
+                                isSelected = table.find(DropdownFunctions.Settings.Default, v) and true or false
+                            else
+                                isSelected = (DropdownFunctions.Settings.Default == i) and true or false
+                            end
+                        end
+
+                        if isSelected then
+                            checkmark.Size = UDim2.fromOffset(12, 0)
+                            checkmark.TextTransparency = 0
+                            optionName.TextTransparency = tweensettings.transparencyIn
+                            if DropdownFunctions.Settings.Multi then
+                                if not table.find(Selected, v) then
+                                    table.insert(Selected, v)
+                                    DropdownFunctions.Value = Selected
+                                end
+                            else
+                                Selected = {v}
+                                DropdownFunctions.Value = v
+                            end
+                        else
+                            checkmark.Size = UDim2.fromOffset(-10, 0)
+                            checkmark.TextTransparency = 1
+                            optionName.TextTransparency = tweensettings.transparencyOut
+                        end
 
 						local option = OptionObjs[v].Button
 
@@ -2903,10 +2921,15 @@ function MacLib:Window(Settings)
 					end
 
 					if DropdownFunctions.Settings.Options then
-						for i, v in pairs(DropdownFunctions.Settings.Options) do
-							addOption(i, v)
-						end
-					end
+                        for i, v in pairs(DropdownFunctions.Settings.Options) do
+                            addOption(i, v)
+                        end
+                        if #Selected > 0 then
+                            dropdownName.Text = DropdownFunctions.Settings.Name .. " • " .. table.concat(Selected, ", ")
+                        else
+                            dropdownName.Text = DropdownFunctions.Settings.Name .. "..."
+                        end
+                    end
 
 					function DropdownFunctions:UpdateName(New)
 						dropdownName.Text = New
